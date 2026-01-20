@@ -64,7 +64,7 @@ try:
         km_run = cols[6].text.strip()
         last_location_raw = cols[5].text.strip()
 
-        # LOCATION CLEANING
+        # Location cleaning
         loc = last_location_raw.upper()
         loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)
         loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)
@@ -116,7 +116,6 @@ table {{
   position:relative;
 }}
 
-/* SHIVA watermark */
 table::before {{
   content:"शिवा";
   position:absolute;
@@ -131,9 +130,9 @@ table::before {{
 
 th, td {{
   border:2px solid #000;
-  padding:6px 10px;      /* ⬅️ बढ़ाया */
+  padding:8px 12px;          /* ⬅️ बड़ा */
   text-align:center;
-  font-size:17px;        /* ⬅️ बढ़ाया */
+  font-size:18.5px;          /* ⬅️ बड़ा */
   white-space: nowrap;
   position:relative;
   z-index:1;
@@ -160,14 +159,14 @@ tr.late td:not(.km-col) {{
 }}
 
 .warning {{
-  margin-top:18px;
+  margin-top:16px;
   background:yellow;
   border:3px solid #000;
-  padding:18px;
+  padding:12px;              /* ⬅️ छोटा */
   text-align:center;
-  font-size:26px;        /* ⬅️ थोड़ा बड़ा */
+  font-size:22px;            /* ⬅️ छोटा */
   font-weight:900;
-  line-height:1.4;
+  line-height:1.3;
 }}
 </style>
 
