@@ -16,8 +16,8 @@ h2 { text-align:center; }
 .top { text-align:center; margin-bottom:12px; }
 
 .refresh-btn {
-  padding:4px 10px;
-  font-size:13px;
+  padding:6px 14px;
+  font-size:14px;
 }
 
 table {
@@ -44,10 +44,10 @@ table::before {
 
 th, td {
   border:2px solid #000;
-  padding:4px 6px;
+  padding:6px 10px;      /* ⬅️ बढ़ाया */
   text-align:center;
-  font-size:15px;
-  white-space: nowrap;     /* ⭐ content के हिसाब से size */
+  font-size:17px;        /* ⬅️ बढ़ाया */
+  white-space: nowrap;
   position:relative;
   z-index:1;
 }
@@ -58,9 +58,7 @@ th {
   cursor:pointer;
 }
 
-.device-col {
-  font-weight:bold;
-}
+.device-col { font-weight:bold; }
 
 .km-col {
   font-weight:bold;
@@ -68,7 +66,6 @@ th {
   color:#000;
 }
 
-/* Red rows (except KM) */
 tr.late td:not(.km-col) {
   background:#ff0000 !important;
   color:white;
@@ -79,11 +76,11 @@ tr.late td:not(.km-col) {
   margin-top:18px;
   background:yellow;
   border:3px solid #000;
-  padding:16px;
+  padding:18px;
   text-align:center;
-  font-size:24px;
+  font-size:26px;        /* ⬅️ थोड़ा बड़ा */
   font-weight:900;
-  line-height:1.35;
+  line-height:1.4;
 }
 </style>
 
@@ -109,7 +106,7 @@ function refreshPage() { location.reload(); }
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> 20-01-2026 09:49:00</div>
+  <div><b>Last Updated:</b> 20-01-2026 09:54:08</div>
   <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
