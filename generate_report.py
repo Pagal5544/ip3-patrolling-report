@@ -70,13 +70,11 @@ try:
         if len(cols) < 7:
             continue
 
-        # -------- Device --------
         raw_device = cols[1].text.strip()
         device = raw_device.replace("RG-PM-CH-HGJ/", "")
         device = device.split("#")[0].replace("RG P", "").strip()
         device = f"P {device}"
 
-        # -------- Other fields --------
         end_time_full = cols[4].text.strip()
         km_run = cols[6].text.strip()
         last_location = cols[5].text.strip()
@@ -92,25 +90,18 @@ try:
             end_dt,
             km_run,
             last_location,
-            False   # late flag
+            False
         ])
 
-    # ===============================
-    # SORT BY END TIME (OLD → NEW)
-    # ===============================
+    # Oldest first
     data.sort(key=lambda x: x[2])
 
-    # ===============================
-    # MARK TOP 3 OLDEST
-    # ===============================
+    # Top 3 oldest = red
     for i in range(min(3, len(data))):
         data[i][5] = True
 
     last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
-    # ===============================
-    # HTML GENERATION
-    # ===============================
     html = f"""<!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -169,8 +160,8 @@ table::before {{
 }}
 
 th, td {{
-  border:1px solid #333;
-  padding:4px;
+  border:2px solid #000;
+  padding:6px;
   text-align:center;
   font-size:16px;
   position: relative;
@@ -178,7 +169,7 @@ th, td {{
 }}
 
 th {{
-  background:#222;
+  background:#000;
   color:white;
   cursor:pointer;
 }}
@@ -189,34 +180,36 @@ th.device-col, td.device-col {{
   font-weight:bold;
 }}
 
-/* KM Run column */
+/* KM Run column – DARK PARROT GREEN */
 th.km-col, td.km-col {{
-  width:80px;
+  width:85px;
   font-weight:bold;
-  background:#c6efce;
+  background:#00e600;   /* गहरा तोता हरा */
+  color:#000;
 }}
 
 /* Top 3 oldest rows */
 tr.late td {{
-  background:#c40000 !important;
+  background:#ff0000 !important;
   color:white;
   font-weight:bold;
 }}
 
-footer {{
+.warning {{
   margin-top:20px;
   background:yellow;
-  padding:12px;
+  border:3px solid #000;
+  padding:18px;
   text-align:center;
-  font-size:17px;
-  font-weight:bold;
+  font-size:26px;
+  font-weight:900;
+  line-height:1.4;
 }}
 </style>
 
 <script>
 let sortAsc = true;
 
-// Numeric sort based on number after P
 function sortDevice() {{
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
@@ -275,9 +268,10 @@ function refreshPage() {{
 </table>
 </div>
 
-<footer>
-लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट (बंद करके दोबारा चालू) कर लें।
-</footer>
+<div class="warning">
+लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट<br>
+(बंद करके दोबारा चालू) कर लें।
+</div>
 
 </body>
 </html>
