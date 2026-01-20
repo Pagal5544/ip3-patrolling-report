@@ -11,11 +11,14 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# ===============================
+# LOGIN DETAILS (GitHub Secrets)
+# ===============================
 LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
 if not LOGIN_USERNAME or not LOGIN_PASSWORD:
-    raise RuntimeError("LOGIN credentials missing")
+    raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
 
 
 # ===============================
@@ -32,7 +35,7 @@ wait = WebDriverWait(driver, 30)
 
 try:
     # ===============================
-    # LOGIN
+    # LOGIN PAGE
     # ===============================
     driver.get("https://ip3.rilapp.com/railways/")
 
@@ -51,40 +54,45 @@ try:
         "&tdate=20/01/2026&ttime=07:20"
         "&category=-PM&Submit=Update"
     )
+
     driver.get(REPORT_URL)
 
     rows = wait.until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))
+        EC.presence_of_all_elements_located(
+            (By.CSS_SELECTOR, "#example tbody tr")
+        )
     )
 
     data = []
 
     for r in rows:
         cols = r.find_elements(By.TAG_NAME, "td")
-        if len(cols) >= 7:
-            raw_device = cols[1].text.strip()
+        if len(cols) < 7:
+            continue
 
-            device = raw_device.replace("RG-PM-CH-HGJ/", "")
-            device = device.split("#")[0].strip()
-            device = device.replace("RG P", "").strip()
-            device = f"P {device}"
+        raw_device = cols[1].text.strip()
 
-            end_time_full = cols[4].text.strip()
-            km_run = cols[6].text.strip()
-            last_location = cols[5].text.strip()
+        device = raw_device.replace("RG-PM-CH-HGJ/", "")
+        device = device.split("#")[0]
+        device = device.replace("RG P", "").strip()
+        device = f"P {device}"
 
-            try:
-                end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
-            except:
-                continue
+        end_time_full = cols[4].text.strip()
+        km_run = cols[6].text.strip()
+        last_location = cols[5].text.strip()
 
-            data.append([
-                device,
-                end_dt.strftime("%H:%M:%S"),
-                end_dt,
-                km_run,
-                last_location
-            ])
+        try:
+            end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
+        except:
+            continue
+
+        data.append([
+            device,
+            end_dt.strftime("%H:%M:%S"),
+            end_dt,
+            km_run,
+            last_location
+        ])
 
     data.sort(key=lambda x: x[2])
 
@@ -93,34 +101,48 @@ try:
     # ===============================
     # HTML GENERATION
     # ===============================
-    html = """
-<!DOCTYPE html>
+    html = """<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <title>Patrolling Report</title>
 <style>
-body { font-family: Arial; background:#f4f4f4; }
-table { border-collapse: collapse; width: 100%; background:white; }
-th, td { border:1px solid #333; padding:8px; text-align:center; }
-th { background:#222; color:white; }
+body { font-family: Arial; background:#f4f4f4; margin:20px; }
+h2 { text-align:center; }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  background: white;
+}
+th, td {
+  border: 1px solid #333;
+  padding: 8px;
+  text-align: center;
+}
+th {
+  background: #222;
+  color: white;
+}
 footer {
-  margin-top:20px;
-  background:yellow;
-  padding:15px;
-  text-align:center;
-  font-size:20px;
-  font-weight:bold;
+  margin-top: 20px;
+  background: yellow;
+  padding: 15px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
 }
 </style>
 </head>
 <body>
 
-<h2 style="text-align:center;">Patrolling Report</h2>
+<h2>Patrolling Report</h2>
 
 <table>
 <tr>
-<th>Device</th><th>End Time</th><th>KM Run</th><th>Last Location</th>
+<th>Device</th>
+<th>End Time</th>
+<th>KM Run</th>
+<th>Last Location</th>
 </tr>
 """
 
@@ -141,7 +163,7 @@ footer {
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("HTML updated successfully")
+    print("index.html generated successfully")
 
 finally:
     driver.quit()
