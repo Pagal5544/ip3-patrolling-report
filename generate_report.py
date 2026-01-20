@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -33,7 +33,6 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
 
-now = datetime.now()
 
 try:
     # ===============================
@@ -59,7 +58,17 @@ try:
     driver.get(REPORT_URL)
 
     rows = wait.until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))
+        EC.presence_of_all_elements_located(
+            (By.CSS_SELECTOR, "#example tbody tr")
+        )
+    )
+
+    # ===============================
+    # CURRENT TIME
+    # ===============================
+    now = datetime.strptime(
+        datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+        "%d/%m/%Y %H:%M:%S"
     )
 
     data = []
@@ -70,7 +79,6 @@ try:
             continue
 
         raw_device = cols[1].text.strip()
-
         device = raw_device.replace("RG-PM-CH-HGJ/", "")
         device = device.split("#")[0].replace("RG P", "").strip()
         device = f"P {device}"
@@ -84,8 +92,13 @@ try:
         except:
             continue
 
-        delay_minutes = (now - end_dt).total_seconds() / 60
-        is_late = delay_minutes >= 10
+        delay_seconds = (now - end_dt).total_seconds()
+        if delay_seconds < 0:
+            is_late = False
+            delay_minutes = 0
+        else:
+            delay_minutes = int(delay_seconds // 60)
+            is_late = delay_seconds >= 600
 
         data.append([
             device,
@@ -93,7 +106,8 @@ try:
             end_dt,
             km_run,
             last_location,
-            is_late
+            is_late,
+            delay_minutes
         ])
 
     data.sort(key=lambda x: x[2])
@@ -108,40 +122,38 @@ try:
 <head>
 <meta charset="UTF-8">
 <title>Patrolling Report</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {{
   font-family: Arial, sans-serif;
   background:#f4f4f4;
-  margin:10px;
+  margin:20px;
 }}
 
-.header {{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
+h2 {{ text-align:center; }}
+
+.top {{
+  text-align:center;
+  margin-bottom:15px;
+}}
+
+input {{
+  padding:6px;
+  font-size:15px;
+  width:180px;
 }}
 
 button {{
-  padding:10px 18px;
-  font-size:16px;
-  background:#007bff;
-  color:white;
-  border:none;
-  border-radius:6px;
-}}
-
-.table-wrapper {{
-  overflow-x:auto;
-  background:white;
+  padding:6px 14px;
+  font-size:15px;
+  margin-left:5px;
+  cursor:pointer;
 }}
 
 table {{
   border-collapse: collapse;
   width:100%;
-  min-width:600px;
+  background:white;
 }}
 
 th, td {{
@@ -156,67 +168,89 @@ th {{
 }}
 
 tr.late {{
-  background:#d40000;
+  background:#c40000;
   color:white;
   font-weight:bold;
 }}
 
 footer {{
-  margin-top:15px;
+  margin-top:20px;
   background:yellow;
   padding:12px;
   text-align:center;
   font-size:18px;
   font-weight:bold;
 }}
-
-@media (max-width: 600px) {{
-  th, td {{
-    padding:6px;
-    font-size:14px;
-  }}
-}}
 </style>
 
 <script>
-function refreshPage() {{
-  location.reload();
+let sortAsc = true;
+
+function filterDevice() {{
+  let input = document.getElementById("deviceFilter").value.toUpperCase();
+  let rows = document.querySelectorAll("table tbody tr");
+
+  rows.forEach(r => {{
+    let cell = r.cells[0].innerText.toUpperCase();
+    r.style.display = cell.includes(input) ? "" : "none";
+  }});
+}}
+
+function sortDevice() {{
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.rows).slice(1);
+
+  rows.sort((a, b) => {{
+    let A = a.cells[0].innerText;
+    let B = b.cells[0].innerText;
+    return sortAsc ? A.localeCompare(B) : B.localeCompare(A);
+  }});
+
+  sortAsc = !sortAsc;
+  rows.forEach(r => table.appendChild(r));
 }}
 </script>
 
 </head>
 <body>
 
-<div class="header">
-  <h2>Patrolling Report</h2>
-  <div><b>Last Updated:</b> {last_updated}</div>
-  <button onclick="refreshPage()">🔄 Refresh</button>
+<h2>Patrolling Report</h2>
+
+<div class="top">
+  <div><b>Last Updated:</b> {last_updated}</div><br>
+
+  <input type="text" id="deviceFilter" placeholder="Filter Device…" onkeyup="filterDevice()">
+  <button onclick="sortDevice()">Sort Device</button>
 </div>
 
-<div class="table-wrapper">
-<table>
+<table id="reportTable">
+<thead>
 <tr>
-<th>Device</th>
-<th>End Time</th>
-<th>KM Run</th>
-<th>Last Location</th>
+  <th>Device</th>
+  <th>End Time</th>
+  <th>KM Run</th>
+  <th>Last Location</th>
+  <th>Delay (min)</th>
 </tr>
+</thead>
+<tbody>
 """
 
     for d in data:
         row_class = "late" if d[5] else ""
         html += f"""
 <tr class="{row_class}">
-<td>{d[0]}</td>
-<td>{d[1]}</td>
-<td>{d[3]}</td>
-<td>{d[4]}</td>
+  <td>{d[0]}</td>
+  <td>{d[1]}</td>
+  <td>{d[3]}</td>
+  <td>{d[4]}</td>
+  <td>{d[6]}</td>
 </tr>
 """
 
     html += """
+</tbody>
 </table>
-</div>
 
 <footer>
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट (बंद करके दोबारा चालू) कर लें।
@@ -229,7 +263,7 @@ function refreshPage() {{
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("index.html generated with highlights & mobile UI")
+    print("index.html generated with device filter & sort")
 
 finally:
     driver.quit()
