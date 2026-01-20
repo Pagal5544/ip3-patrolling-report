@@ -64,7 +64,7 @@ try:
     )
 
     # ===============================
-    # CURRENT TIME
+    # CURRENT TIME (NORMALIZED)
     # ===============================
     now = datetime.strptime(
         datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
@@ -78,11 +78,13 @@ try:
         if len(cols) < 7:
             continue
 
+        # ---- Device ----
         raw_device = cols[1].text.strip()
         device = raw_device.replace("RG-PM-CH-HGJ/", "")
         device = device.split("#")[0].replace("RG P", "").strip()
         device = f"P {device}"
 
+        # ---- Other fields ----
         end_time_full = cols[4].text.strip()
         km_run = cols[6].text.strip()
         last_location = cols[5].text.strip()
@@ -93,12 +95,7 @@ try:
             continue
 
         delay_seconds = (now - end_dt).total_seconds()
-        if delay_seconds < 0:
-            is_late = False
-            delay_minutes = 0
-        else:
-            delay_minutes = int(delay_seconds // 60)
-            is_late = delay_seconds >= 600
+        is_late = delay_seconds >= 600 if delay_seconds >= 0 else False
 
         data.append([
             device,
@@ -106,10 +103,12 @@ try:
             end_dt,
             km_run,
             last_location,
-            is_late,
-            delay_minutes
+            is_late
         ])
 
+    # ===============================
+    # SORT BY END TIME (DEFAULT)
+    # ===============================
     data.sort(key=lambda x: x[2])
 
     # ===============================
@@ -137,19 +136,6 @@ h2 {{ text-align:center; }}
   margin-bottom:15px;
 }}
 
-input {{
-  padding:6px;
-  font-size:15px;
-  width:180px;
-}}
-
-button {{
-  padding:6px 14px;
-  font-size:15px;
-  margin-left:5px;
-  cursor:pointer;
-}}
-
 table {{
   border-collapse: collapse;
   width:100%;
@@ -165,6 +151,7 @@ th, td {{
 th {{
   background:#222;
   color:white;
+  cursor:pointer;
 }}
 
 tr.late {{
@@ -186,28 +173,23 @@ footer {{
 <script>
 let sortAsc = true;
 
-function filterDevice() {{
-  let input = document.getElementById("deviceFilter").value.toUpperCase();
-  let rows = document.querySelectorAll("table tbody tr");
-
-  rows.forEach(r => {{
-    let cell = r.cells[0].innerText.toUpperCase();
-    r.style.display = cell.includes(input) ? "" : "none";
-  }});
-}}
-
+// 🔢 Numeric sort based on number after 'P'
 function sortDevice() {{
   let table = document.getElementById("reportTable");
-  let rows = Array.from(table.rows).slice(1);
+  let rows = Array.from(table.tBodies[0].rows);
 
   rows.sort((a, b) => {{
-    let A = a.cells[0].innerText;
-    let B = b.cells[0].innerText;
-    return sortAsc ? A.localeCompare(B) : B.localeCompare(A);
+    let numA = parseInt(a.cells[0].innerText.replace(/\\D/g, "")) || 0;
+    let numB = parseInt(b.cells[0].innerText.replace(/\\D/g, "")) || 0;
+    return sortAsc ? numA - numB : numB - numA;
   }});
 
   sortAsc = !sortAsc;
-  rows.forEach(r => table.appendChild(r));
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}}
+
+function refreshPage() {{
+  location.reload();
 }}
 </script>
 
@@ -217,20 +199,18 @@ function sortDevice() {{
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> {last_updated}</div><br>
-
-  <input type="text" id="deviceFilter" placeholder="Filter Device…" onkeyup="filterDevice()">
-  <button onclick="sortDevice()">Sort Device</button>
+  <div><b>Last Updated:</b> {last_updated}</div>
+  <br>
+  <button onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
 <table id="reportTable">
 <thead>
 <tr>
-  <th>Device</th>
+  <th onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
   <th>KM Run</th>
   <th>Last Location</th>
-  <th>Delay (min)</th>
 </tr>
 </thead>
 <tbody>
@@ -244,7 +224,6 @@ function sortDevice() {{
   <td>{d[1]}</td>
   <td>{d[3]}</td>
   <td>{d[4]}</td>
-  <td>{d[6]}</td>
 </tr>
 """
 
@@ -263,7 +242,7 @@ function sortDevice() {{
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("index.html generated with device filter & sort")
+    print("index.html generated with numeric device sort")
 
 finally:
     driver.quit()
