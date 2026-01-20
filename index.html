@@ -11,23 +11,38 @@ body {
   margin:20px;
 }
 
-h2 { text-align:center; }
+h2 {
+  text-align:center;
+  margin-bottom:5px;
+}
 
 .top {
   text-align:center;
   margin-bottom:15px;
 }
 
+button {
+  padding:6px 14px;
+  font-size:14px;
+}
+
+.table-container {
+  display:flex;
+  justify-content:center;
+}
+
 table {
   border-collapse: collapse;
   width:100%;
+  max-width:900px;
   background:white;
 }
 
 th, td {
   border:1px solid #333;
-  padding:8px;
+  padding:6px;
   text-align:center;
+  font-size:14px;
 }
 
 th {
@@ -47,7 +62,7 @@ footer {
   background:yellow;
   padding:12px;
   text-align:center;
-  font-size:18px;
+  font-size:17px;
   font-weight:bold;
 }
 </style>
@@ -55,15 +70,15 @@ footer {
 <script>
 let sortAsc = true;
 
-// 🔢 Numeric sort based on number after 'P'
+// Numeric sort based on number after P
 function sortDevice() {
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
 
   rows.sort((a, b) => {
-    let numA = parseInt(a.cells[0].innerText.replace(/\D/g, "")) || 0;
-    let numB = parseInt(b.cells[0].innerText.replace(/\D/g, "")) || 0;
-    return sortAsc ? numA - numB : numB - numA;
+    let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
+    return sortAsc ? A - B : B - A;
   });
 
   sortAsc = !sortAsc;
@@ -81,11 +96,11 @@ function refreshPage() {
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> 20-01-2026 04:52:36</div>
-  <br>
+  <div><b>Last Updated:</b> 20-01-2026 05:08:35</div><br>
   <button onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
+<div class="table-container">
 <table id="reportTable">
 <thead>
 <tr>
@@ -97,21 +112,21 @@ function refreshPage() {
 </thead>
 <tbody>
 
-<tr class="">
+<tr class="late">
   <td>P 9</td>
   <td>06:42:12</td>
   <td>16.2</td>
   <td>OHEHECTOMETERPOST101/7CH-ALJN</td>
 </tr>
 
-<tr class="">
+<tr class="late">
   <td>P 8</td>
   <td>06:45:18</td>
   <td>16.3</td>
   <td>98/0CH-ALJN</td>
 </tr>
 
-<tr class="">
+<tr class="late">
   <td>P 1</td>
   <td>06:47:42</td>
   <td>16.7</td>
@@ -246,6 +261,7 @@ function refreshPage() {
 
 </tbody>
 </table>
+</div>
 
 <footer>
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट (बंद करके दोबारा चालू) कर लें।
