@@ -3,40 +3,38 @@
 <head>
 <meta charset="UTF-8">
 <title>Patrolling Report</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   font-family: Arial, sans-serif;
   background:#f4f4f4;
-  margin:10px;
+  margin:20px;
 }
 
-.header {
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
+h2 { text-align:center; }
+
+.top {
+  text-align:center;
+  margin-bottom:15px;
+}
+
+input {
+  padding:6px;
+  font-size:15px;
+  width:180px;
 }
 
 button {
-  padding:10px 18px;
-  font-size:16px;
-  background:#007bff;
-  color:white;
-  border:none;
-  border-radius:6px;
-}
-
-.table-wrapper {
-  overflow-x:auto;
-  background:white;
+  padding:6px 14px;
+  font-size:15px;
+  margin-left:5px;
+  cursor:pointer;
 }
 
 table {
   border-collapse: collapse;
   width:100%;
-  min-width:600px;
+  background:white;
 }
 
 th, td {
@@ -51,201 +49,243 @@ th {
 }
 
 tr.late {
-  background:#d40000;
+  background:#c40000;
   color:white;
   font-weight:bold;
 }
 
 footer {
-  margin-top:15px;
+  margin-top:20px;
   background:yellow;
   padding:12px;
   text-align:center;
   font-size:18px;
   font-weight:bold;
 }
-
-@media (max-width: 600px) {
-  th, td {
-    padding:6px;
-    font-size:14px;
-  }
-}
 </style>
 
 <script>
-function refreshPage() {
-  location.reload();
+let sortAsc = true;
+
+function filterDevice() {
+  let input = document.getElementById("deviceFilter").value.toUpperCase();
+  let rows = document.querySelectorAll("table tbody tr");
+
+  rows.forEach(r => {
+    let cell = r.cells[0].innerText.toUpperCase();
+    r.style.display = cell.includes(input) ? "" : "none";
+  });
+}
+
+function sortDevice() {
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.rows).slice(1);
+
+  rows.sort((a, b) => {
+    let A = a.cells[0].innerText;
+    let B = b.cells[0].innerText;
+    return sortAsc ? A.localeCompare(B) : B.localeCompare(A);
+  });
+
+  sortAsc = !sortAsc;
+  rows.forEach(r => table.appendChild(r));
 }
 </script>
 
 </head>
 <body>
 
-<div class="header">
-  <h2>Patrolling Report</h2>
-  <div><b>Last Updated:</b> 20-01-2026 04:28:35</div>
-  <button onclick="refreshPage()">🔄 Refresh</button>
+<h2>Patrolling Report</h2>
+
+<div class="top">
+  <div><b>Last Updated:</b> 20-01-2026 04:43:11</div><br>
+
+  <input type="text" id="deviceFilter" placeholder="Filter Device…" onkeyup="filterDevice()">
+  <button onclick="sortDevice()">Sort Device</button>
 </div>
 
-<div class="table-wrapper">
-<table>
+<table id="reportTable">
+<thead>
 <tr>
-<th>Device</th>
-<th>End Time</th>
-<th>KM Run</th>
-<th>Last Location</th>
+  <th>Device</th>
+  <th>End Time</th>
+  <th>KM Run</th>
+  <th>Last Location</th>
+  <th>Delay (min)</th>
+</tr>
+</thead>
+<tbody>
+
+<tr class="">
+  <td>P 9</td>
+  <td>06:42:12</td>
+  <td>16.2</td>
+  <td>OHEHECTOMETERPOST101/7CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 9</td>
-<td>06:42:12</td>
-<td>16.2</td>
-<td>OHEHECTOMETERPOST101/7CH-ALJN</td>
+  <td>P 8</td>
+  <td>06:45:18</td>
+  <td>16.3</td>
+  <td>98/0CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 8</td>
-<td>06:45:18</td>
-<td>16.3</td>
-<td>98/0CH-ALJN</td>
+  <td>P 1</td>
+  <td>06:47:42</td>
+  <td>16.7</td>
+  <td>CENTERLINEOFLC37/BCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 1</td>
-<td>06:47:42</td>
-<td>16.7</td>
-<td>CENTERLINEOFLC37/BCH-ALJN</td>
+  <td>P 2</td>
+  <td>06:47:46</td>
+  <td>16.1</td>
+  <td>CENTERLINEOFLC40CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 2</td>
-<td>06:47:46</td>
-<td>16.1</td>
-<td>CENTERLINEOFLC40CCH-ALJN</td>
+  <td>P 16</td>
+  <td>06:48:26</td>
+  <td>16.1</td>
+  <td>OHEHECTOMETERPOST130/6CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 16</td>
-<td>06:48:26</td>
-<td>16.1</td>
-<td>OHEHECTOMETERPOST130/6CH-ALJN</td>
+  <td>P 10</td>
+  <td>06:50:23</td>
+  <td>16.4</td>
+  <td>OHEHECTOMETERPOST109/4CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 10</td>
-<td>06:50:23</td>
-<td>16.4</td>
-<td>OHEHECTOMETERPOST109/4CH-ALJN</td>
+  <td>P 7</td>
+  <td>06:53:33</td>
+  <td>16.6</td>
+  <td>CENTERLINEOFLC-51/CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 7</td>
-<td>06:53:33</td>
-<td>16.6</td>
-<td>CENTERLINEOFLC-51/CCH-ALJN</td>
+  <td>P 17</td>
+  <td>06:54:10</td>
+  <td>16.4</td>
+  <td>OHEHECTOMETERPOST133/5CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 17</td>
-<td>06:54:10</td>
-<td>16.4</td>
-<td>OHEHECTOMETERPOST133/5CH-ALJN</td>
+  <td>P 5</td>
+  <td>06:54:19</td>
+  <td>16.5</td>
+  <td>OHEHECTOMETERPOST85/8CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 5</td>
-<td>06:54:19</td>
-<td>16.5</td>
-<td>OHEHECTOMETERPOST85/8CH-ALJN</td>
+  <td>P 19</td>
+  <td>06:55:03</td>
+  <td>16.2</td>
+  <td>CENTERLINEOFLC-73/CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 19</td>
-<td>06:55:03</td>
-<td>16.2</td>
-<td>CENTERLINEOFLC-73/CCH-ALJN</td>
+  <td>P 6</td>
+  <td>06:56:28</td>
+  <td>16.3</td>
+  <td>OHEHECTOMETERPOST93/4CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 6</td>
-<td>06:56:28</td>
-<td>16.3</td>
-<td>OHEHECTOMETERPOST93/4CH-ALJN</td>
+  <td>P 12</td>
+  <td>06:59:11</td>
+  <td>16.4</td>
+  <td>OHEHECTOMETERPOST112/6CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 12</td>
-<td>06:59:11</td>
-<td>16.4</td>
-<td>OHEHECTOMETERPOST112/6CH-ALJN</td>
+  <td>P 11</td>
+  <td>06:59:23</td>
+  <td>16</td>
+  <td>CENTERLINEOFLC-56/ACCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 11</td>
-<td>06:59:23</td>
-<td>16</td>
-<td>CENTERLINEOFLC-56/ACCH-ALJN</td>
+  <td>P 4</td>
+  <td>07:03:19</td>
+  <td>17</td>
+  <td>OHEHECTOMETERPOST86/3CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 4</td>
-<td>07:03:19</td>
-<td>17</td>
-<td>OHEHECTOMETERPOST86/3CH-ALJN</td>
+  <td>P 18</td>
+  <td>07:03:26</td>
+  <td>15.6</td>
+  <td>CENTERLINEOFLC-73/CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 18</td>
-<td>07:03:26</td>
-<td>15.6</td>
-<td>CENTERLINEOFLC-73/CCH-ALJN</td>
+  <td>P 3</td>
+  <td>07:09:57</td>
+  <td>16.4</td>
+  <td>CENTERLINEOFLC40CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 3</td>
-<td>07:09:57</td>
-<td>16.4</td>
-<td>CENTERLINEOFLC40CCH-ALJN</td>
+  <td>P 14</td>
+  <td>07:12:08</td>
+  <td>16.6</td>
+  <td>OHEHECTOMETERPOST125/2CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 14</td>
-<td>07:12:08</td>
-<td>16.6</td>
-<td>OHEHECTOMETERPOST125/2CH-ALJN</td>
+  <td>P 13</td>
+  <td>07:12:20</td>
+  <td>16.5</td>
+  <td>OHEHECTOMETERPOST118/8CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 13</td>
-<td>07:12:20</td>
-<td>16.5</td>
-<td>OHEHECTOMETERPOST118/8CH-ALJN</td>
+  <td>P 15</td>
+  <td>07:14:42</td>
+  <td>16.1</td>
+  <td>OHEHECTOMETERPOST125/2CH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 15</td>
-<td>07:14:42</td>
-<td>16.1</td>
-<td>OHEHECTOMETERPOST125/2CH-ALJN</td>
+  <td>P 20</td>
+  <td>07:15:04</td>
+  <td>16.4</td>
+  <td>CENTERLINEOFLC-77/CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
 <tr class="">
-<td>P 20</td>
-<td>07:15:04</td>
-<td>16.4</td>
-<td>CENTERLINEOFLC-77/CCH-ALJN</td>
+  <td>P 21</td>
+  <td>07:19:32</td>
+  <td>17.5</td>
+  <td>CENTERLINEOFLC-77/CCH-ALJN</td>
+  <td>0</td>
 </tr>
 
-<tr class="">
-<td>P 21</td>
-<td>07:19:32</td>
-<td>17.5</td>
-<td>CENTERLINEOFLC-77/CCH-ALJN</td>
-</tr>
-
+</tbody>
 </table>
-</div>
 
 <footer>
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट (बंद करके दोबारा चालू) कर लें।
