@@ -1,168 +1,96 @@
-import os
-import time
-from datetime import datetime
-
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from webdriver_manager.chrome import ChromeDriverManager
-
-
-LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
-LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
-
-if not LOGIN_USERNAME or not LOGIN_PASSWORD:
-    raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
-
-
-chrome_options = Options()
-chrome_options.add_argument("--headless=new")
-chrome_options.add_argument("--no-sandbox")
-chrome_options.add_argument("--disable-dev-shm-usage")
-
-service = Service(ChromeDriverManager().install())
-driver = webdriver.Chrome(service=service, options=chrome_options)
-wait = WebDriverWait(driver, 30)
-
-
-try:
-    # LOGIN
-    driver.get("https://ip3.rilapp.com/railways/")
-    wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
-    wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
-    wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
-    time.sleep(8)
-
-    # REPORT
-    REPORT_URL = (
-        "https://ip3.rilapp.com/railways/patrollingReport.php"
-        "?fdate=19/01/2026&ftime=23:00"
-        "&tdate=20/01/2026&ttime=07:20"
-        "&category=-PM&Submit=Update"
-    )
-    driver.get(REPORT_URL)
-
-    rows = wait.until(
-        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))
-    )
-
-    data = []
-
-    for r in rows:
-        cols = r.find_elements(By.TAG_NAME, "td")
-        if len(cols) < 7:
-            continue
-
-        raw_device = cols[1].text.strip()
-        device_num = raw_device.replace("RG-PM-CH-HGJ/", "").split("#")[0].replace("RG P", "").strip()
-        device = f"P {device_num}"
-
-        end_time_full = cols[4].text.strip()
-        km_run = cols[6].text.strip()
-        last_location = cols[5].text.strip()
-
-        # ===== LOCATION CLEANING =====
-        last_location = last_location.replace("OHEHECTOMETERPOST", "KM")
-        last_location = last_location.replace("CENTERLINEOFLC", "फाटक")
-        last_location = last_location.replace("CH-ALJN", "")
-        last_location = last_location.strip("/ ")
-
-        try:
-            end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
-        except:
-            continue
-
-        data.append([
-            device,
-            end_dt.strftime("%H:%M:%S"),
-            end_dt,
-            km_run,
-            last_location,
-            False
-        ])
-
-    # SORT oldest first
-    data.sort(key=lambda x: x[2])
-
-    # Top 3 oldest
-    for i in range(min(3, len(data))):
-        data[i][5] = True
-
-    last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
-
-    html = f"""<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <title>Patrolling Report</title>
 
 <style>
-body {{
+body {
   font-family: Arial, sans-serif;
   background:#f4f4f4;
   margin:20px;
-}}
+}
 
-h2 {{ text-align:center; margin-bottom:5px; }}
+h2 {
+  text-align:center;
+  margin-bottom:5px;
+}
 
-.top {{ text-align:center; margin-bottom:15px; }}
+.top {
+  text-align:center;
+  margin-bottom:15px;
+}
 
-.refresh-btn {{
+.refresh-btn {
   padding:6px 14px;
   font-size:14px;
   cursor:pointer;
-}}
+}
 
-table {{
+.table-wrap {
+  display:flex;
+  justify-content:center;
+}
+
+table {
   border-collapse: collapse;
   width:100%;
   max-width:900px;
   background:white;
   position:relative;
   overflow:hidden;
-}}
+}
 
-table::before {{
-  content:"शिवा";
+/* ===== SHIVA WATERMARK ===== */
+table::before {
+  content: "शिवा";
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%,-50%) rotate(-20deg);
+  transform:translate(-50%, -50%) rotate(-20deg);
   font-size:140px;
   font-weight:900;
   color:rgba(0,0,0,0.07);
+  white-space:nowrap;
+  pointer-events:none;
   z-index:0;
-}}
+}
 
-th, td {{
+th, td {
   border:2px solid #000;
   padding:6px;
   text-align:center;
   font-size:16px;
   position:relative;
   z-index:1;
-}}
+}
 
-th {{ background:#000; color:white; cursor:pointer; }}
+th {
+  background:#000;
+  color:white;
+  cursor:pointer;
+}
 
-.device-col {{ width:70px; font-weight:bold; }}
+.device-col {
+  width:70px;
+  font-weight:bold;
+}
 
-.km-col {{
+.km-col {
   width:85px;
   font-weight:bold;
-  background:#00e600;
-}}
+  background:#00e600;   /* हमेशा हरा */
+  color:#000;
+}
 
-tr.late td:not(.km-col) {{
+/* लाल – लेकिन KM Run नहीं */
+tr.late td:not(.km-col) {
   background:#ff0000 !important;
   color:white;
   font-weight:bold;
-}}
+}
 
-.warning {{
+.warning {
   margin-top:20px;
   background:yellow;
   border:3px solid #000;
@@ -171,23 +99,31 @@ tr.late td:not(.km-col) {{
   font-size:26px;
   font-weight:900;
   line-height:1.4;
-}}
+}
 </style>
 
 <script>
 let sortAsc = true;
-function sortDevice() {{
+
+// Device numeric sort
+function sortDevice() {
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
-  rows.sort((a,b)=> {{
-    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,''))||0;
-    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,''))||0;
-    return sortAsc ? A-B : B-A;
-  }});
+
+  rows.sort((a, b) => {
+    let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
+    return sortAsc ? A - B : B - A;
+  });
+
   sortAsc = !sortAsc;
-  rows.forEach(r=>table.tBodies[0].appendChild(r));
-}}
-function refreshPage() {{ location.reload(); }}
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}
+
+// Refresh
+function refreshPage() {
+  location.reload();
+}
 </script>
 
 </head>
@@ -196,10 +132,11 @@ function refreshPage() {{ location.reload(); }}
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> {last_updated}</div><br>
+  <div><b>Last Updated:</b> 20-01-2026 09:31:06</div><br>
   <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
+<div class="table-wrap">
 <table id="reportTable">
 <thead>
 <tr>
@@ -210,22 +147,157 @@ function refreshPage() {{ location.reload(); }}
 </tr>
 </thead>
 <tbody>
-"""
 
-    for d in data:
-        row_class = "late" if d[5] else ""
-        html += f"""
-<tr class="{row_class}">
-  <td class="device-col">{d[0]}</td>
-  <td>{d[1]}</td>
-  <td class="km-col">{d[3]}</td>
-  <td>{d[4]}</td>
+<tr class="late">
+  <td class="device-col">P 9</td>
+  <td>06:42:12</td>
+  <td class="km-col">16.2</td>
+  <td>OHEHECTOMETERPOST101/7CH-ALJN</td>
 </tr>
-"""
 
-    html += """
+<tr class="late">
+  <td class="device-col">P 8</td>
+  <td>06:45:18</td>
+  <td class="km-col">16.3</td>
+  <td>98/0CH-ALJN</td>
+</tr>
+
+<tr class="late">
+  <td class="device-col">P 1</td>
+  <td>06:47:42</td>
+  <td class="km-col">16.7</td>
+  <td>CENTERLINEOFLC37/BCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 2</td>
+  <td>06:47:46</td>
+  <td class="km-col">16.1</td>
+  <td>CENTERLINEOFLC40CCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 16</td>
+  <td>06:48:26</td>
+  <td class="km-col">16.1</td>
+  <td>OHEHECTOMETERPOST130/6CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 10</td>
+  <td>06:50:23</td>
+  <td class="km-col">16.4</td>
+  <td>OHEHECTOMETERPOST109/4CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 7</td>
+  <td>06:53:33</td>
+  <td class="km-col">16.6</td>
+  <td>CENTERLINEOFLC-51/CCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 17</td>
+  <td>06:54:10</td>
+  <td class="km-col">16.4</td>
+  <td>OHEHECTOMETERPOST133/5CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 5</td>
+  <td>06:54:19</td>
+  <td class="km-col">16.5</td>
+  <td>OHEHECTOMETERPOST85/8CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 19</td>
+  <td>06:55:03</td>
+  <td class="km-col">16.2</td>
+  <td>CENTERLINEOFLC-73/CCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 6</td>
+  <td>06:56:28</td>
+  <td class="km-col">16.3</td>
+  <td>OHEHECTOMETERPOST93/4CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 12</td>
+  <td>06:59:11</td>
+  <td class="km-col">16.4</td>
+  <td>OHEHECTOMETERPOST112/6CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 11</td>
+  <td>06:59:23</td>
+  <td class="km-col">16</td>
+  <td>CENTERLINEOFLC-56/ACCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 4</td>
+  <td>07:03:19</td>
+  <td class="km-col">17</td>
+  <td>OHEHECTOMETERPOST86/3CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 18</td>
+  <td>07:03:26</td>
+  <td class="km-col">15.6</td>
+  <td>CENTERLINEOFLC-73/CCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 3</td>
+  <td>07:09:57</td>
+  <td class="km-col">16.4</td>
+  <td>CENTERLINEOFLC40CCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 14</td>
+  <td>07:12:08</td>
+  <td class="km-col">16.6</td>
+  <td>OHEHECTOMETERPOST125/2CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 13</td>
+  <td>07:12:20</td>
+  <td class="km-col">16.5</td>
+  <td>OHEHECTOMETERPOST118/8CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 15</td>
+  <td>07:14:42</td>
+  <td class="km-col">16.1</td>
+  <td>OHEHECTOMETERPOST125/2CH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 20</td>
+  <td>07:15:04</td>
+  <td class="km-col">16.4</td>
+  <td>CENTERLINEOFLC-77/CCH-ALJN</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 21</td>
+  <td>07:19:32</td>
+  <td class="km-col">17.5</td>
+  <td>CENTERLINEOFLC-77/CCH-ALJN</td>
+</tr>
+
 </tbody>
 </table>
+</div>
 
 <div class="warning">
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट<br>
@@ -234,10 +306,3 @@ function refreshPage() {{ location.reload(); }}
 
 </body>
 </html>
-"""
-
-    with open("index.html", "w", encoding="utf-8") as f:
-        f.write(html)
-
-finally:
-    driver.quit()
