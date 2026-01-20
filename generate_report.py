@@ -225,7 +225,7 @@ function refreshPage() {{ location.reload(); }}
 </table>
 
 <div class="warning">
-लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट<br>
+लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट<br>
 (बंद करके दोबारा चालू) कर लें।
 </div>
 
