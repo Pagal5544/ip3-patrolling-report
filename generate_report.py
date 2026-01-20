@@ -27,7 +27,6 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
 
-
 try:
     # LOGIN
     driver.get("https://ip3.rilapp.com/railways/")
@@ -45,7 +44,9 @@ try:
     )
     driver.get(REPORT_URL)
 
-    rows = wait.until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr")))
+    rows = wait.until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))
+    )
 
     data = []
 
@@ -55,7 +56,8 @@ try:
             continue
 
         raw_device = cols[1].text.strip()
-        device = f"P {raw_device.replace('RG-PM-CH-HGJ/','').split('#')[0].replace('RG P','').strip()}"
+        device_num = raw_device.replace("RG-PM-CH-HGJ/", "").split("#")[0].replace("RG P", "").strip()
+        device = f"P {device_num}"
 
         end_time_full = cols[4].text.strip()
         km_run = cols[6].text.strip()
@@ -68,9 +70,10 @@ try:
 
         data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])
 
+    # Oldest first
     data.sort(key=lambda x: x[2])
 
-    # TOP 3 OLDEST
+    # Top 3 oldest red
     for i in range(min(3, len(data))):
         data[i][5] = True
 
@@ -98,7 +101,6 @@ table {{
   width:100%;
   max-width:900px;
   background:white;
-  position:relative;
 }}
 
 th, td {{
@@ -111,18 +113,22 @@ th, td {{
 th {{
   background:#000;
   color:white;
+  cursor:pointer;
 }}
 
-.device-col {{ width:70px; font-weight:bold; }}
+.device-col {{
+  width:70px;
+  font-weight:bold;
+}}
 
 .km-col {{
   width:85px;
   font-weight:bold;
-  background:#00e600;   /* हमेशा हरा */
+  background:#00e600;
   color:#000;
 }}
 
-/* 🔴 लाल सिर्फ KM को छोड़कर */
+/* लाल सिर्फ KM को छोड़कर */
 tr.late td:not(.km-col) {{
   background:#ff0000 !important;
   color:white;
@@ -141,6 +147,25 @@ tr.late td:not(.km-col) {{
 }}
 </style>
 
+<script>
+let sortAsc = true;
+
+// 🔢 Device numeric sort (P के बाद के अंक)
+function sortDevice() {{
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.tBodies[0].rows);
+
+  rows.sort((a, b) => {{
+    let A = parseInt(a.cells[0].innerText.replace(/\\D/g, '')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\\D/g, '')) || 0;
+    return sortAsc ? A - B : B - A;
+  }});
+
+  sortAsc = !sortAsc;
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}}
+</script>
+
 </head>
 <body>
 
@@ -150,13 +175,16 @@ tr.late td:not(.km-col) {{
   <div><b>Last Updated:</b> {last_updated}</div>
 </div>
 
-<table>
+<table id="reportTable">
+<thead>
 <tr>
-  <th class="device-col">Device</th>
+  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
   <th class="km-col">KM Run</th>
   <th>Last Location</th>
 </tr>
+</thead>
+<tbody>
 """
 
     for d in data:
@@ -170,7 +198,8 @@ tr.late td:not(.km-col) {{
 </tr>
 """
 
-    html += f"""
+    html += """
+</tbody>
 </table>
 
 <div class="warning">
