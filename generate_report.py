@@ -63,14 +63,6 @@ try:
         )
     )
 
-    # ===============================
-    # CURRENT TIME (NORMALIZED)
-    # ===============================
-    now = datetime.strptime(
-        datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
-        "%d/%m/%Y %H:%M:%S"
-    )
-
     data = []
 
     for r in rows:
@@ -78,13 +70,13 @@ try:
         if len(cols) < 7:
             continue
 
-        # ---- Device ----
+        # -------- Device --------
         raw_device = cols[1].text.strip()
         device = raw_device.replace("RG-PM-CH-HGJ/", "")
         device = device.split("#")[0].replace("RG P", "").strip()
         device = f"P {device}"
 
-        # ---- Other fields ----
+        # -------- Other fields --------
         end_time_full = cols[4].text.strip()
         km_run = cols[6].text.strip()
         last_location = cols[5].text.strip()
@@ -94,28 +86,31 @@ try:
         except:
             continue
 
-        delay_seconds = (now - end_dt).total_seconds()
-        is_late = delay_seconds >= 600 if delay_seconds >= 0 else False
-
         data.append([
             device,
             end_dt.strftime("%H:%M:%S"),
             end_dt,
             km_run,
             last_location,
-            is_late
+            False   # late flag (default)
         ])
 
     # ===============================
-    # SORT BY END TIME (DEFAULT)
+    # SORT BY END TIME (OLD → NEW)
     # ===============================
     data.sort(key=lambda x: x[2])
 
     # ===============================
+    # MARK TOP 3 OLDEST AS RED
+    # ===============================
+    for i in range(min(3, len(data))):
+        data[i][5] = True
+
+    last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+
+    # ===============================
     # HTML GENERATION
     # ===============================
-    last_updated = now.strftime("%d-%m-%Y %H:%M:%S")
-
     html = f"""<!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -129,23 +124,38 @@ body {{
   margin:20px;
 }}
 
-h2 {{ text-align:center; }}
+h2 {{
+  text-align:center;
+  margin-bottom:5px;
+}}
 
 .top {{
   text-align:center;
   margin-bottom:15px;
 }}
 
+button {{
+  padding:6px 14px;
+  font-size:14px;
+}}
+
+.table-container {{
+  display:flex;
+  justify-content:center;
+}}
+
 table {{
   border-collapse: collapse;
   width:100%;
+  max-width:900px;
   background:white;
 }}
 
 th, td {{
   border:1px solid #333;
-  padding:8px;
+  padding:6px;
   text-align:center;
+  font-size:14px;
 }}
 
 th {{
@@ -165,7 +175,7 @@ footer {{
   background:yellow;
   padding:12px;
   text-align:center;
-  font-size:18px;
+  font-size:17px;
   font-weight:bold;
 }}
 </style>
@@ -173,15 +183,15 @@ footer {{
 <script>
 let sortAsc = true;
 
-// 🔢 Numeric sort based on number after 'P'
+// Numeric sort based on number after P
 function sortDevice() {{
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
 
   rows.sort((a, b) => {{
-    let numA = parseInt(a.cells[0].innerText.replace(/\\D/g, "")) || 0;
-    let numB = parseInt(b.cells[0].innerText.replace(/\\D/g, "")) || 0;
-    return sortAsc ? numA - numB : numB - numA;
+    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,'')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,'')) || 0;
+    return sortAsc ? A - B : B - A;
   }});
 
   sortAsc = !sortAsc;
@@ -199,11 +209,11 @@ function refreshPage() {{
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> {last_updated}</div>
-  <br>
+  <div><b>Last Updated:</b> {last_updated}</div><br>
   <button onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
+<div class="table-container">
 <table id="reportTable">
 <thead>
 <tr>
@@ -230,6 +240,7 @@ function refreshPage() {{
     html += """
 </tbody>
 </table>
+</div>
 
 <footer>
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट (बंद करके दोबारा चालू) कर लें।
@@ -241,8 +252,6 @@ function refreshPage() {{
 
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
-
-    print("index.html generated with numeric device sort")
 
 finally:
     driver.quit()
