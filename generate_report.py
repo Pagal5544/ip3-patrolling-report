@@ -1,6 +1,6 @@
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,7 +12,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 
 # ===============================
-# LOGIN DETAILS (GitHub Secrets)
+# LOGIN DETAILS
 # ===============================
 LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
@@ -33,9 +33,11 @@ service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
 
+now = datetime.now()
+
 try:
     # ===============================
-    # LOGIN PAGE
+    # LOGIN
     # ===============================
     driver.get("https://ip3.rilapp.com/railways/")
 
@@ -54,13 +56,10 @@ try:
         "&tdate=20/01/2026&ttime=07:20"
         "&category=-PM&Submit=Update"
     )
-
     driver.get(REPORT_URL)
 
     rows = wait.until(
-        EC.presence_of_all_elements_located(
-            (By.CSS_SELECTOR, "#example tbody tr")
-        )
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))
     )
 
     data = []
@@ -73,8 +72,7 @@ try:
         raw_device = cols[1].text.strip()
 
         device = raw_device.replace("RG-PM-CH-HGJ/", "")
-        device = device.split("#")[0]
-        device = device.replace("RG P", "").strip()
+        device = device.split("#")[0].replace("RG P", "").strip()
         device = f"P {device}"
 
         end_time_full = cols[4].text.strip()
@@ -86,57 +84,116 @@ try:
         except:
             continue
 
+        delay_minutes = (now - end_dt).total_seconds() / 60
+        is_late = delay_minutes >= 10
+
         data.append([
             device,
             end_dt.strftime("%H:%M:%S"),
             end_dt,
             km_run,
-            last_location
+            last_location,
+            is_late
         ])
 
     data.sort(key=lambda x: x[2])
 
-    final_rows = [[d[0], d[1], d[3], d[4]] for d in data]
-
     # ===============================
     # HTML GENERATION
     # ===============================
-    html = """<!DOCTYPE html>
+    last_updated = now.strftime("%d-%m-%Y %H:%M:%S")
+
+    html = f"""<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <title>Patrolling Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <style>
-body { font-family: Arial; background:#f4f4f4; margin:20px; }
-h2 { text-align:center; }
-table {
+body {{
+  font-family: Arial, sans-serif;
+  background:#f4f4f4;
+  margin:10px;
+}}
+
+.header {{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}}
+
+button {{
+  padding:10px 18px;
+  font-size:16px;
+  background:#007bff;
+  color:white;
+  border:none;
+  border-radius:6px;
+}}
+
+.table-wrapper {{
+  overflow-x:auto;
+  background:white;
+}}
+
+table {{
   border-collapse: collapse;
-  width: 100%;
-  background: white;
-}
-th, td {
-  border: 1px solid #333;
-  padding: 8px;
-  text-align: center;
-}
-th {
-  background: #222;
-  color: white;
-}
-footer {
-  margin-top: 20px;
-  background: yellow;
-  padding: 15px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
-}
+  width:100%;
+  min-width:600px;
+}}
+
+th, td {{
+  border:1px solid #333;
+  padding:8px;
+  text-align:center;
+}}
+
+th {{
+  background:#222;
+  color:white;
+}}
+
+tr.late {{
+  background:#d40000;
+  color:white;
+  font-weight:bold;
+}}
+
+footer {{
+  margin-top:15px;
+  background:yellow;
+  padding:12px;
+  text-align:center;
+  font-size:18px;
+  font-weight:bold;
+}}
+
+@media (max-width: 600px) {{
+  th, td {{
+    padding:6px;
+    font-size:14px;
+  }}
+}}
 </style>
+
+<script>
+function refreshPage() {{
+  location.reload();
+}}
+</script>
+
 </head>
 <body>
 
-<h2>Patrolling Report</h2>
+<div class="header">
+  <h2>Patrolling Report</h2>
+  <div><b>Last Updated:</b> {last_updated}</div>
+  <button onclick="refreshPage()">🔄 Refresh</button>
+</div>
 
+<div class="table-wrapper">
 <table>
 <tr>
 <th>Device</th>
@@ -146,11 +203,20 @@ footer {
 </tr>
 """
 
-    for r in final_rows:
-        html += f"<tr><td>{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td></tr>"
+    for d in data:
+        row_class = "late" if d[5] else ""
+        html += f"""
+<tr class="{row_class}">
+<td>{d[0]}</td>
+<td>{d[1]}</td>
+<td>{d[3]}</td>
+<td>{d[4]}</td>
+</tr>
+"""
 
     html += """
 </table>
+</div>
 
 <footer>
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट (बंद करके दोबारा चालू) कर लें।
@@ -163,7 +229,7 @@ footer {
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(html)
 
-    print("index.html generated successfully")
+    print("index.html generated with highlights & mobile UI")
 
 finally:
     driver.quit()
