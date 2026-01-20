@@ -1,5 +1,10 @@
 name: Update Patrolling Report
 
+# 🔐 GitHub Actions को repo में लिखने की अनुमति
+permissions:
+  contents: write
+
+# ⏱️ Manual + Auto (हर 30 मिनट)
 on:
   workflow_dispatch:
   schedule:
@@ -10,32 +15,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Repo checkout
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Python setup
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
+      # 3️⃣ Google Chrome install (Selenium के लिए)
       - name: Install Google Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
+      # 4️⃣ Python dependencies install
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
 
-      - name: Run scraping script
+      # 5️⃣ Scraping script run
+      - name: Run IP3 scraping script
         env:
           LOGIN_USERNAME: ${{ secrets.LOGIN_USERNAME }}
           LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
-        run: python generate_report.py
-
-      - name: Commit and push changes
         run: |
+          python generate_report.py
+
+      # 6️⃣ index.html commit & push
+      - name: Commit and push updated HTML
+        run: |
+          git status
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add index.html
-          git commit -m "Auto update patrolling report" || echo "No changes"
+          git commit -m "Auto update patrolling report" || echo "No changes to commit"
           git push
