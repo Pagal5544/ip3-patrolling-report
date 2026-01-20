@@ -64,16 +64,13 @@ try:
         km_run = cols[6].text.strip()
         last_location_raw = cols[5].text.strip()
 
-        # ========= LOCATION CLEANING =========
+        # LOCATION CLEANING
         loc = last_location_raw.upper()
-
         loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)
         loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)
         loc = re.sub(r"CH\s*-\s*ALJN", "", loc)
-
         loc = re.sub(r"\s+", " ", loc).strip(" -/")
         last_location = loc
-        # ====================================
 
         try:
             end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
@@ -82,7 +79,6 @@ try:
 
         data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])
 
-    # Oldest first
     data.sort(key=lambda x: x[2])
     for i in range(min(3, len(data))):
         data[i][5] = True
@@ -107,8 +103,8 @@ h2 {{ text-align:center; }}
 .top {{ text-align:center; margin-bottom:12px; }}
 
 .refresh-btn {{
-  padding:4px 10px;
-  font-size:13px;
+  padding:6px 14px;
+  font-size:14px;
 }}
 
 table {{
@@ -135,10 +131,10 @@ table::before {{
 
 th, td {{
   border:2px solid #000;
-  padding:4px 6px;
+  padding:6px 10px;      /* ⬅️ बढ़ाया */
   text-align:center;
-  font-size:15px;
-  white-space: nowrap;     /* ⭐ content के हिसाब से size */
+  font-size:17px;        /* ⬅️ बढ़ाया */
+  white-space: nowrap;
   position:relative;
   z-index:1;
 }}
@@ -149,9 +145,7 @@ th {{
   cursor:pointer;
 }}
 
-.device-col {{
-  font-weight:bold;
-}}
+.device-col {{ font-weight:bold; }}
 
 .km-col {{
   font-weight:bold;
@@ -159,7 +153,6 @@ th {{
   color:#000;
 }}
 
-/* Red rows (except KM) */
 tr.late td:not(.km-col) {{
   background:#ff0000 !important;
   color:white;
@@ -170,11 +163,11 @@ tr.late td:not(.km-col) {{
   margin-top:18px;
   background:yellow;
   border:3px solid #000;
-  padding:16px;
+  padding:18px;
   text-align:center;
-  font-size:24px;
+  font-size:26px;        /* ⬅️ थोड़ा बड़ा */
   font-weight:900;
-  line-height:1.35;
+  line-height:1.4;
 }}
 </style>
 
