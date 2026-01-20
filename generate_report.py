@@ -41,7 +41,7 @@ try:
         "https://ip3.rilapp.com/railways/patrollingReport.php"
         "?fdate=20/01/2026&ftime=23:00"
         "&tdate=21/01/2026&ttime=07:20"
-        "&category=-KM&Submit=Update"
+        "&category=-PM&Submit=Update"
     )
     driver.get(REPORT_URL)
 
