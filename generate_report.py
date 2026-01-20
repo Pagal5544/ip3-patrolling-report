@@ -1,5 +1,6 @@
 import os
 import time
+import re
 from datetime import datetime
 
 from selenium import webdriver
@@ -26,7 +27,6 @@ chrome_options.add_argument("--disable-dev-shm-usage")
 service = Service(ChromeDriverManager().install())
 driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
-
 
 try:
     # LOGIN
@@ -62,32 +62,28 @@ try:
 
         end_time_full = cols[4].text.strip()
         km_run = cols[6].text.strip()
-        last_location = cols[5].text.strip()
+        last_location_raw = cols[5].text.strip()
 
-        # ===== LOCATION CLEANING =====
-        last_location = last_location.replace("OHEHECTOMETERPOST", "KM")
-        last_location = last_location.replace("CENTERLINEOFLC", "फाटक")
-        last_location = last_location.replace("CH-ALJN", "")
-        last_location = last_location.strip("/ ")
+        # ========= LOCATION CLEANING =========
+        loc = last_location_raw.upper()
+
+        loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)
+        loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)
+        loc = re.sub(r"CH\s*-\s*ALJN", "", loc)
+
+        loc = re.sub(r"\s+", " ", loc).strip(" -/")
+        last_location = loc
+        # ====================================
 
         try:
             end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
         except:
             continue
 
-        data.append([
-            device,
-            end_dt.strftime("%H:%M:%S"),
-            end_dt,
-            km_run,
-            last_location,
-            False
-        ])
+        data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])
 
-    # SORT oldest first
+    # Oldest first
     data.sort(key=lambda x: x[2])
-
-    # Top 3 oldest
     for i in range(min(3, len(data))):
         data[i][5] = True
 
@@ -106,25 +102,25 @@ body {{
   margin:20px;
 }}
 
-h2 {{ text-align:center; margin-bottom:5px; }}
+h2 {{ text-align:center; }}
 
-.top {{ text-align:center; margin-bottom:15px; }}
+.top {{ text-align:center; margin-bottom:12px; }}
 
 .refresh-btn {{
-  padding:6px 14px;
-  font-size:14px;
-  cursor:pointer;
+  padding:4px 10px;
+  font-size:13px;
 }}
 
 table {{
   border-collapse: collapse;
-  width:100%;
-  max-width:900px;
+  table-layout: auto;
+  width: auto;
+  margin: 0 auto;
   background:white;
   position:relative;
-  overflow:hidden;
 }}
 
+/* SHIVA watermark */
 table::before {{
   content:"शिवा";
   position:absolute;
@@ -139,23 +135,31 @@ table::before {{
 
 th, td {{
   border:2px solid #000;
-  padding:6px;
+  padding:4px 6px;
   text-align:center;
-  font-size:16px;
+  font-size:15px;
+  white-space: nowrap;     /* ⭐ content के हिसाब से size */
   position:relative;
   z-index:1;
 }}
 
-th {{ background:#000; color:white; cursor:pointer; }}
-
-.device-col {{ width:70px; font-weight:bold; }}
-
-.km-col {{
-  width:85px;
-  font-weight:bold;
-  background:#00e600;
+th {{
+  background:#000;
+  color:white;
+  cursor:pointer;
 }}
 
+.device-col {{
+  font-weight:bold;
+}}
+
+.km-col {{
+  font-weight:bold;
+  background:#00e600;
+  color:#000;
+}}
+
+/* Red rows (except KM) */
 tr.late td:not(.km-col) {{
   background:#ff0000 !important;
   color:white;
@@ -163,14 +167,14 @@ tr.late td:not(.km-col) {{
 }}
 
 .warning {{
-  margin-top:20px;
+  margin-top:18px;
   background:yellow;
   border:3px solid #000;
-  padding:18px;
+  padding:16px;
   text-align:center;
-  font-size:26px;
+  font-size:24px;
   font-weight:900;
-  line-height:1.4;
+  line-height:1.35;
 }}
 </style>
 
@@ -196,7 +200,7 @@ function refreshPage() {{ location.reload(); }}
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> {last_updated}</div><br>
+  <div><b>Last Updated:</b> {last_updated}</div>
   <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
