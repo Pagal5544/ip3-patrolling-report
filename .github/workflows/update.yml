@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup Python
@@ -18,24 +18,24 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Install Chrome
+      - name: Install Google Chrome
         run: |
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: pip install -r requirements.txt
 
-      - name: Run script
+      - name: Run scraping script
         env:
           LOGIN_USERNAME: ${{ secrets.LOGIN_USERNAME }}
           LOGIN_PASSWORD: ${{ secrets.LOGIN_PASSWORD }}
         run: python generate_report.py
 
-      - name: Commit & Push
+      - name: Commit and push changes
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add index.html
-          git commit -m "Auto update report" || echo "No changes"
+          git commit -m "Auto update patrolling report" || echo "No changes"
           git push
