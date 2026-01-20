@@ -92,7 +92,7 @@ try:
             end_dt,
             km_run,
             last_location,
-            False   # late flag (default)
+            False   # late flag
         ])
 
     # ===============================
@@ -101,7 +101,7 @@ try:
     data.sort(key=lambda x: x[2])
 
     # ===============================
-    # MARK TOP 3 OLDEST AS RED
+    # MARK TOP 3 OLDEST
     # ===============================
     for i in range(min(3, len(data))):
         data[i][5] = True
@@ -149,6 +149,23 @@ table {{
   width:100%;
   max-width:900px;
   background:white;
+  position: relative;
+  overflow: hidden;
+}}
+
+/* ===== WATERMARK ===== */
+table::before {{
+  content: "शिवा";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  font-size: 140px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.07);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
 }}
 
 th, td {{
@@ -156,6 +173,8 @@ th, td {{
   padding:6px;
   text-align:center;
   font-size:14px;
+  position: relative;
+  z-index: 1;
 }}
 
 th {{
@@ -164,8 +183,22 @@ th {{
   cursor:pointer;
 }}
 
-tr.late {{
-  background:#c40000;
+/* Device column */
+th.device-col, td.device-col {{
+  width:70px;
+  font-weight:bold;
+}}
+
+/* KM Run column */
+th.km-col, td.km-col {{
+  width:80px;
+  font-weight:bold;
+  background:#c6efce;
+}}
+
+/* Top 3 oldest rows */
+tr.late td {{
+  background:#c40000 !important;
   color:white;
   font-weight:bold;
 }}
@@ -217,9 +250,9 @@ function refreshPage() {{
 <table id="reportTable">
 <thead>
 <tr>
-  <th onclick="sortDevice()">Device ⬍</th>
+  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
-  <th>KM Run</th>
+  <th class="km-col">KM Run</th>
   <th>Last Location</th>
 </tr>
 </thead>
@@ -230,9 +263,9 @@ function refreshPage() {{
         row_class = "late" if d[5] else ""
         html += f"""
 <tr class="{row_class}">
-  <td>{d[0]}</td>
+  <td class="device-col">{d[0]}</td>
   <td>{d[1]}</td>
-  <td>{d[3]}</td>
+  <td class="km-col">{d[3]}</td>
   <td>{d[4]}</td>
 </tr>
 """
