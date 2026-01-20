@@ -170,9 +170,9 @@ table::before {{
 
 th, td {{
   border:1px solid #333;
-  padding:6px;
+  padding:4px;
   text-align:center;
-  font-size:14px;
+  font-size:16px;
   position: relative;
   z-index: 1;
 }}
