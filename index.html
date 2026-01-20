@@ -36,6 +36,23 @@ table {
   width:100%;
   max-width:900px;
   background:white;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ===== WATERMARK ===== */
+table::before {
+  content: "शिवा";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-20deg);
+  font-size: 140px;
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.07);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 0;
 }
 
 th, td {
@@ -43,6 +60,8 @@ th, td {
   padding:6px;
   text-align:center;
   font-size:14px;
+  position: relative;
+  z-index: 1;
 }
 
 th {
@@ -51,8 +70,22 @@ th {
   cursor:pointer;
 }
 
-tr.late {
-  background:#c40000;
+/* Device column */
+th.device-col, td.device-col {
+  width:70px;
+  font-weight:bold;
+}
+
+/* KM Run column */
+th.km-col, td.km-col {
+  width:80px;
+  font-weight:bold;
+  background:#c6efce;
+}
+
+/* Top 3 oldest rows */
+tr.late td {
+  background:#c40000 !important;
   color:white;
   font-weight:bold;
 }
@@ -96,7 +129,7 @@ function refreshPage() {
 <h2>Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> 20-01-2026 05:49:37</div><br>
+  <div><b>Last Updated:</b> 20-01-2026 06:23:14</div><br>
   <button onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
@@ -104,158 +137,158 @@ function refreshPage() {
 <table id="reportTable">
 <thead>
 <tr>
-  <th onclick="sortDevice()">Device ⬍</th>
+  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
-  <th>KM Run</th>
+  <th class="km-col">KM Run</th>
   <th>Last Location</th>
 </tr>
 </thead>
 <tbody>
 
 <tr class="late">
-  <td>P 9</td>
+  <td class="device-col">P 9</td>
   <td>06:42:12</td>
-  <td>16.2</td>
+  <td class="km-col">16.2</td>
   <td>OHEHECTOMETERPOST101/7CH-ALJN</td>
 </tr>
 
 <tr class="late">
-  <td>P 8</td>
+  <td class="device-col">P 8</td>
   <td>06:45:18</td>
-  <td>16.3</td>
+  <td class="km-col">16.3</td>
   <td>98/0CH-ALJN</td>
 </tr>
 
 <tr class="late">
-  <td>P 1</td>
+  <td class="device-col">P 1</td>
   <td>06:47:42</td>
-  <td>16.7</td>
+  <td class="km-col">16.7</td>
   <td>CENTERLINEOFLC37/BCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 2</td>
+  <td class="device-col">P 2</td>
   <td>06:47:46</td>
-  <td>16.1</td>
+  <td class="km-col">16.1</td>
   <td>CENTERLINEOFLC40CCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 16</td>
+  <td class="device-col">P 16</td>
   <td>06:48:26</td>
-  <td>16.1</td>
+  <td class="km-col">16.1</td>
   <td>OHEHECTOMETERPOST130/6CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 10</td>
+  <td class="device-col">P 10</td>
   <td>06:50:23</td>
-  <td>16.4</td>
+  <td class="km-col">16.4</td>
   <td>OHEHECTOMETERPOST109/4CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 7</td>
+  <td class="device-col">P 7</td>
   <td>06:53:33</td>
-  <td>16.6</td>
+  <td class="km-col">16.6</td>
   <td>CENTERLINEOFLC-51/CCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 17</td>
+  <td class="device-col">P 17</td>
   <td>06:54:10</td>
-  <td>16.4</td>
+  <td class="km-col">16.4</td>
   <td>OHEHECTOMETERPOST133/5CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 5</td>
+  <td class="device-col">P 5</td>
   <td>06:54:19</td>
-  <td>16.5</td>
+  <td class="km-col">16.5</td>
   <td>OHEHECTOMETERPOST85/8CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 19</td>
+  <td class="device-col">P 19</td>
   <td>06:55:03</td>
-  <td>16.2</td>
+  <td class="km-col">16.2</td>
   <td>CENTERLINEOFLC-73/CCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 6</td>
+  <td class="device-col">P 6</td>
   <td>06:56:28</td>
-  <td>16.3</td>
+  <td class="km-col">16.3</td>
   <td>OHEHECTOMETERPOST93/4CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 12</td>
+  <td class="device-col">P 12</td>
   <td>06:59:11</td>
-  <td>16.4</td>
+  <td class="km-col">16.4</td>
   <td>OHEHECTOMETERPOST112/6CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 11</td>
+  <td class="device-col">P 11</td>
   <td>06:59:23</td>
-  <td>16</td>
+  <td class="km-col">16</td>
   <td>CENTERLINEOFLC-56/ACCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 4</td>
+  <td class="device-col">P 4</td>
   <td>07:03:19</td>
-  <td>17</td>
+  <td class="km-col">17</td>
   <td>OHEHECTOMETERPOST86/3CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 18</td>
+  <td class="device-col">P 18</td>
   <td>07:03:26</td>
-  <td>15.6</td>
+  <td class="km-col">15.6</td>
   <td>CENTERLINEOFLC-73/CCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 3</td>
+  <td class="device-col">P 3</td>
   <td>07:09:57</td>
-  <td>16.4</td>
+  <td class="km-col">16.4</td>
   <td>CENTERLINEOFLC40CCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 14</td>
+  <td class="device-col">P 14</td>
   <td>07:12:08</td>
-  <td>16.6</td>
+  <td class="km-col">16.6</td>
   <td>OHEHECTOMETERPOST125/2CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 13</td>
+  <td class="device-col">P 13</td>
   <td>07:12:20</td>
-  <td>16.5</td>
+  <td class="km-col">16.5</td>
   <td>OHEHECTOMETERPOST118/8CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 15</td>
+  <td class="device-col">P 15</td>
   <td>07:14:42</td>
-  <td>16.1</td>
+  <td class="km-col">16.1</td>
   <td>OHEHECTOMETERPOST125/2CH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 20</td>
+  <td class="device-col">P 20</td>
   <td>07:15:04</td>
-  <td>16.4</td>
+  <td class="km-col">16.4</td>
   <td>CENTERLINEOFLC-77/CCH-ALJN</td>
 </tr>
 
 <tr class="">
-  <td>P 21</td>
+  <td class="device-col">P 21</td>
   <td>07:19:32</td>
-  <td>17.5</td>
+  <td class="km-col">17.5</td>
   <td>CENTERLINEOFLC-77/CCH-ALJN</td>
 </tr>
 
