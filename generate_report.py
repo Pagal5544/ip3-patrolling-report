@@ -122,7 +122,7 @@ table::before {{
   top:50%;
   left:50%;
   transform:translate(-50%,-50%) rotate(-20deg);
-  font-size:140px;
+  font-size:500px;
   font-weight:900;
   color:rgba(0,0,0,0.07);
   z-index:0;
@@ -130,17 +130,18 @@ table::before {{
 
 th, td {{
   border:2px solid #000;
-  padding:8px 12px;          /* ⬅️ बड़ा */
+  padding:15px 50px;          /* ⬅️ बड़ा */
   text-align:center;
-  font-size:18.5px;          /* ⬅️ बड़ा */
+  font-size:20px;          /* ⬅️ बड़ा */
+  font-weight:900;
   white-space: nowrap;
   position:relative;
   z-index:1;
 }}
 
 th {{
-  background:#000;
-  color:white;
+  background:#D6E6FA;
+  color:black;
   cursor:pointer;
 }}
 
@@ -162,10 +163,10 @@ tr.late td:not(.km-col) {{
   margin-top:16px;
   background:yellow;
   border:3px solid #000;
-  padding:12px;              /* ⬅️ छोटा */
+  padding:15px 5px;              /* ⬅️ छोटा */
   text-align:center;
-  font-size:22px;            /* ⬅️ छोटा */
-  font-weight:900;
+  font-size:30px;            /* ⬅️ छोटा */
+  font-weight:800;
   line-height:1.3;
 }}
 </style>
@@ -189,7 +190,7 @@ function refreshPage() {{ location.reload(); }}
 </head>
 <body>
 
-<h2>Patrolling Report</h2>
+<h2>राजघाट Night Patrolling Report</h2>
 
 <div class="top">
   <div><b>Last Updated:</b> {last_updated}</div>
