@@ -11,9 +11,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-# ===============================
-# LOGIN DETAILS
-# ===============================
 LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
@@ -21,9 +18,6 @@ if not LOGIN_USERNAME or not LOGIN_PASSWORD:
     raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
 
 
-# ===============================
-# SELENIUM SETUP
-# ===============================
 chrome_options = Options()
 chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--no-sandbox")
@@ -35,18 +29,14 @@ wait = WebDriverWait(driver, 30)
 
 
 try:
-    # ===============================
     # LOGIN
-    # ===============================
     driver.get("https://ip3.rilapp.com/railways/")
     wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
     wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
     wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
     time.sleep(8)
 
-    # ===============================
-    # REPORT PAGE
-    # ===============================
+    # REPORT
     REPORT_URL = (
         "https://ip3.rilapp.com/railways/patrollingReport.php"
         "?fdate=19/01/2026&ftime=23:00"
@@ -74,6 +64,12 @@ try:
         km_run = cols[6].text.strip()
         last_location = cols[5].text.strip()
 
+        # ===== LOCATION CLEANING =====
+        last_location = last_location.replace("OHEHECTOMETERPOST", "KM")
+        last_location = last_location.replace("CENTERLINEOFLC", "फाटक")
+        last_location = last_location.replace("CH-ALJN", "")
+        last_location = last_location.strip("/ ")
+
         try:
             end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
         except:
@@ -88,18 +84,15 @@ try:
             False
         ])
 
-    # ===============================
-    # SORT & MARK
-    # ===============================
-    data.sort(key=lambda x: x[2])          # oldest first
-    for i in range(min(3, len(data))):     # top 3 oldest
+    # SORT oldest first
+    data.sort(key=lambda x: x[2])
+
+    # Top 3 oldest
+    for i in range(min(3, len(data))):
         data[i][5] = True
 
     last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
-    # ===============================
-    # HTML
-    # ===============================
     html = f"""<!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -113,25 +106,14 @@ body {{
   margin:20px;
 }}
 
-h2 {{
-  text-align:center;
-  margin-bottom:5px;
-}}
+h2 {{ text-align:center; margin-bottom:5px; }}
 
-.top {{
-  text-align:center;
-  margin-bottom:15px;
-}}
+.top {{ text-align:center; margin-bottom:15px; }}
 
 .refresh-btn {{
   padding:6px 14px;
   font-size:14px;
   cursor:pointer;
-}}
-
-.table-wrap {{
-  display:flex;
-  justify-content:center;
 }}
 
 table {{
@@ -143,18 +125,15 @@ table {{
   overflow:hidden;
 }}
 
-/* ===== SHIVA WATERMARK ===== */
 table::before {{
-  content: "शिवा";
+  content:"शिवा";
   position:absolute;
   top:50%;
   left:50%;
-  transform:translate(-50%, -50%) rotate(-20deg);
+  transform:translate(-50%,-50%) rotate(-20deg);
   font-size:140px;
   font-weight:900;
   color:rgba(0,0,0,0.07);
-  white-space:nowrap;
-  pointer-events:none;
   z-index:0;
 }}
 
@@ -167,25 +146,16 @@ th, td {{
   z-index:1;
 }}
 
-th {{
-  background:#000;
-  color:white;
-  cursor:pointer;
-}}
+th {{ background:#000; color:white; cursor:pointer; }}
 
-.device-col {{
-  width:70px;
-  font-weight:bold;
-}}
+.device-col {{ width:70px; font-weight:bold; }}
 
 .km-col {{
   width:85px;
   font-weight:bold;
-  background:#00e600;   /* हमेशा हरा */
-  color:#000;
+  background:#00e600;
 }}
 
-/* लाल – लेकिन KM Run नहीं */
 tr.late td:not(.km-col) {{
   background:#ff0000 !important;
   color:white;
@@ -206,26 +176,18 @@ tr.late td:not(.km-col) {{
 
 <script>
 let sortAsc = true;
-
-// Device numeric sort
 function sortDevice() {{
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
-
-  rows.sort((a, b) => {{
-    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,'')) || 0;
-    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,'')) || 0;
-    return sortAsc ? A - B : B - A;
+  rows.sort((a,b)=> {{
+    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,''))||0;
+    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,''))||0;
+    return sortAsc ? A-B : B-A;
   }});
-
   sortAsc = !sortAsc;
-  rows.forEach(r => table.tBodies[0].appendChild(r));
+  rows.forEach(r=>table.tBodies[0].appendChild(r));
 }}
-
-// Refresh
-function refreshPage() {{
-  location.reload();
-}}
+function refreshPage() {{ location.reload(); }}
 </script>
 
 </head>
@@ -238,7 +200,6 @@ function refreshPage() {{
   <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
-<div class="table-wrap">
 <table id="reportTable">
 <thead>
 <tr>
@@ -265,7 +226,6 @@ function refreshPage() {{
     html += """
 </tbody>
 </table>
-</div>
 
 <div class="warning">
 लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट<br>
