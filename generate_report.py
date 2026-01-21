@@ -13,7 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-# ================== LOGIN CREDENTIALS ==================
+# ================== LOGIN ==================
 LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
@@ -21,7 +21,7 @@ if not LOGIN_USERNAME or not LOGIN_PASSWORD:
     raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
 
 
-# ================== CHROME SETUP ==================
+# ================== CHROME ==================
 chrome_options = Options()
 chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--no-sandbox")
@@ -32,16 +32,14 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
 
 try:
-    # ================== LOGIN ==================
+    # ================== LOGIN PAGE ==================
     driver.get("https://ip3.rilapp.com/railways/")
     wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
     wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
     wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
-
-    # login success wait
     time.sleep(8)
 
-    # ================== REPORT PAGE ==================
+    # ================== REPORT ==================
     REPORT_URL = (
         "https://ip3.rilapp.com/railways/patrollingReport.php"
         "?fdate=20/01/2026&ftime=23:00"
@@ -69,7 +67,7 @@ try:
         km_run = cols[6].text.strip()
         last_location_raw = cols[5].text.strip()
 
-        # -------- Location cleaning --------
+        # -------- Location clean --------
         loc = last_location_raw.upper()
         loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)
         loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)
@@ -91,12 +89,12 @@ try:
             False
         ])
 
-    # ================== SORT & MARK LATE ==================
+    # ================== SORT & LATE ==================
     data.sort(key=lambda x: x[2])
     for i in range(min(3, len(data))):
         data[i][5] = True
 
-    # ================== IST LAST UPDATED ==================
+    # ================== IST TIME ==================
     ist = ZoneInfo("Asia/Kolkata")
     last_updated = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
 
@@ -120,7 +118,7 @@ h2 {{ text-align:center; }}
 
 table {{
   border-collapse: collapse;
-  margin: 0 auto;
+  margin:0 auto;
   background:white;
   position:relative;
 }}
@@ -139,17 +137,23 @@ table::before {{
 
 th, td {{
   border:2px solid #000;
-  padding:15px 50px;
+  padding:15px 45px;
   text-align:center;
   font-size:20px;
   font-weight:900;
+  white-space:nowrap;
   position:relative;
   z-index:1;
-  white-space:nowrap;
 }}
 
 th {{
   background:#D6E6FA;
+  cursor:pointer;
+}}
+
+.device-col {{
+  font-weight:900;
+  min-width:160px;
 }}
 
 .km-col {{
@@ -157,7 +161,7 @@ th {{
 }}
 
 tr.late td:not(.km-col) {{
-  background:red;
+  background:red !important;
   color:white;
 }}
 
@@ -171,8 +175,25 @@ tr.late td:not(.km-col) {{
   font-weight:800;
 }}
 </style>
-</head>
 
+<script>
+let sortAsc = true;
+function sortDevice() {{
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.tBodies[0].rows);
+
+  rows.sort((a,b)=> {{
+    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,'')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,'')) || 0;
+    return sortAsc ? A-B : B-A;
+  }});
+
+  sortAsc = !sortAsc;
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}}
+</script>
+
+</head>
 <body>
 
 <h2>राजघाट Night Patrolling Report</h2>
@@ -181,10 +202,10 @@ tr.late td:not(.km-col) {{
   <b>Last Updated (IST):</b> {last_updated}
 </div>
 
-<table>
+<table id="reportTable">
 <thead>
 <tr>
-  <th>Device</th>
+  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
   <th class="km-col">KM Run</th>
   <th>Last Location</th>
@@ -197,7 +218,7 @@ tr.late td:not(.km-col) {{
         row_class = "late" if d[5] else ""
         html += f"""
 <tr class="{row_class}">
-  <td>{d[0]}</td>
+  <td class="device-col">{d[0]}</td>
   <td>{d[1]}</td>
   <td class="km-col">{d[3]}</td>
   <td>{d[4]}</td>
