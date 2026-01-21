@@ -176,40 +176,39 @@ tr.late td:not(.km-col) {{
 
 <script>
 let sortAsc = true;
-let sortKmAsc = true;   // KM Run के लिए अलग flag
+let sortKmAsc = true;
 
-function sortDevice() {
+function sortDevice() {{
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
 
-  rows.sort((a, b) => {
+  rows.sort((a, b) => {{
     let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
     let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
     return sortAsc ? A - B : B - A;
-  });
+  }});
 
   sortAsc = !sortAsc;
   rows.forEach(r => table.tBodies[0].appendChild(r));
-}
+}}
 
-/* ✅ KM RUN SORT */
-function sortKm() {
+function sortKm() {{
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
 
-  rows.sort((a, b) => {
-    let A = parseFloat(a.cells[2].innerText) || 0; // KM Run column
+  rows.sort((a, b) => {{
+    let A = parseFloat(a.cells[2].innerText) || 0;
     let B = parseFloat(b.cells[2].innerText) || 0;
     return sortKmAsc ? A - B : B - A;
-  });
+  }});
 
   sortKmAsc = !sortKmAsc;
   rows.forEach(r => table.tBodies[0].appendChild(r));
-}
+}}
 
-function refreshPage() {
+function refreshPage() {{
   location.reload();
-}
+}}
 </script>
 
 </head>
