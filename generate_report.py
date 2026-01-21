@@ -83,7 +83,11 @@ try:
     for i in range(min(3, len(data))):
         data[i][5] = True
 
-    last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+    from datetime import datetime
+import pytz
+
+ist = pytz.timezone("Asia/Kolkata")
+last_updated = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
 
     html = f"""<!DOCTYPE html>
 <html lang="hi">
