@@ -85,7 +85,8 @@ try:
 
 from datetime import datetime, timezone, timedelta
 
-IST = timezone(timedelta(hours=5, minutes=30))last_updated = datetime.now(IST).strftime("%d-%m-%Y %H:%M:%S")
+IST = timezone(timedelta(hours=5, minutes=30))
+last_updated = datetime.now(IST).strftime("%d-%m-%Y %H:%M:%S")
 
     html = f"""<!DOCTYPE html>
 <html lang="hi">
