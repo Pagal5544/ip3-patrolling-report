@@ -83,7 +83,9 @@ try:
     for i in range(min(3, len(data))):
         data[i][5] = True
 
-    last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
+from datetime import datetime, timezone, timedelta
+
+IST = timezone(timedelta(hours=5, minutes=30))last_updated = datetime.now(IST).strftime("%d-%m-%Y %H:%M:%S")
 
     html = f"""<!DOCTYPE html>
 <html lang="hi">
