@@ -1,115 +1,280 @@
 <!DOCTYPE html>
-Patrolling Report
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Patrolling Report</title>
 
-राजघाट Night Patrolling Report
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background:#f4f4f4;
+  margin:20px;
+}
 
-Last Updated: 21-01-2026 03:11:36
-🔄 Refresh
+h2 { text-align:center; }
 
-P 14
-06:31:52
-16.6
-KM 125/2
+.top { text-align:center; margin-bottom:12px; }
 
-P 1
-06:32:41
-16.9
-फाटक 37/B
+.refresh-btn {
+  padding:6px 14px;
+  font-size:14px;
+}
 
-P 17
-06:33:44
-16.5
-KM 133/5
+table {
+  border-collapse: collapse;
+  table-layout: auto;
+  width: auto;
+  margin: 0 auto;
+  background:white;
+  position:relative;
+}
 
-P 2
-06:43:35
-16.1
-KM 77/1
+table::before {
+  content:"शिवा";
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%) rotate(-20deg);
+  font-size:500px;
+  font-weight:900;
+  color:rgba(0,0,0,0.07);
+  z-index:0;
+}
 
-P 16
-06:46:35
-16.4
-KM 129/6
+th, td {
+  border:2px solid #000;
+  padding:15px 50px;          /* ⬅️ बड़ा */
+  text-align:center;
+  font-size:20px;          /* ⬅️ बड़ा */
+  font-weight:900;
+  white-space: nowrap;
+  position:relative;
+  z-index:1;
+}
 
-P 9
-06:49:16
-16.2
-KM 101/6
+th {
+  background:#D6E6FA;
+  color:black;
+  cursor:pointer;
+}
 
-P 6
-06:50:01
-16.2
-KM 93/5
+.device-col { font-weight:bold; }
 
-P 19
-06:50:02
-17.2
-KM 141/6
+.km-col {
+  font-weight:bold;
+  background:#00e600;
+  color:#000;
+}
 
-P 8
-06:50:15
-13.6
-फाटक -51/C
+tr.late td:not(.km-col) {
+  background:#ff0000 !important;
+  color:white;
+  font-weight:bold;
+}
 
-P 5
-06:52:41
-16.4
-KM 85/8
+.warning {
+  margin-top:16px;
+  background:yellow;
+  border:3px solid #000;
+  padding:15px 5px;              /* ⬅️ छोटा */
+  text-align:center;
+  font-size:30px;            /* ⬅️ छोटा */
+  font-weight:800;
+  line-height:1.3;
+}
+</style>
 
-P 7
-06:53:48
-16.5
-फाटक -51/C
+<script>
+let sortAsc = true;
+function sortDevice() {
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.tBodies[0].rows);
+  rows.sort((a,b)=> {
+    let A = parseInt(a.cells[0].innerText.replace(/\D/g,''))||0;
+    let B = parseInt(b.cells[0].innerText.replace(/\D/g,''))||0;
+    return sortAsc ? A-B : B-A;
+  });
+  sortAsc = !sortAsc;
+  rows.forEach(r=>table.tBodies[0].appendChild(r));
+}
+function refreshPage() { location.reload(); }
+</script>
 
-P 18
-06:54:33
-17.4
-फाटक -73/C
+</head>
+<body>
 
-P 10
-06:56:10
-16.5
-फाटक -56/C
+<h2>राजघाट Night Patrolling Report</h2>
 
-P 12
-06:59:28
-16.1
-KM 112/5
+<div class="top">
+  <div><b>Last Updated:</b> 21-01-2026 03:18:13</div>
+  <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
+</div>
 
-P 13
-06:59:37
-16.7
-फाटक -61/C
+<table id="reportTable">
+<thead>
+<tr>
+  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
+  <th>End Time</th>
+  <th class="km-col">KM Run</th>
+  <th>Last Location</th>
+</tr>
+</thead>
+<tbody>
 
-P 4
-07:02:19
-16.2
-फाटक -42C
+<tr class="late">
+  <td class="device-col">P 9</td>
+  <td>06:42:12</td>
+  <td class="km-col">16.2</td>
+  <td>KM 101/7</td>
+</tr>
 
-P 11
-07:06:13
-16.9
-फाटक -56/AC
+<tr class="late">
+  <td class="device-col">P 8</td>
+  <td>06:45:18</td>
+  <td class="km-col">16.3</td>
+  <td>98/0</td>
+</tr>
 
-P 20
-07:11:50
-16.4
-फाटक -77/C
+<tr class="late">
+  <td class="device-col">P 1</td>
+  <td>06:47:42</td>
+  <td class="km-col">16.7</td>
+  <td>फाटक 37/B</td>
+</tr>
 
-P 15
-07:13:05
-16.1
-KM 125/2
+<tr class="">
+  <td class="device-col">P 2</td>
+  <td>06:47:46</td>
+  <td class="km-col">16.1</td>
+  <td>फाटक 40C</td>
+</tr>
 
-P 3
-07:14:11
-16.1
-फाटक 40C
+<tr class="">
+  <td class="device-col">P 16</td>
+  <td>06:48:26</td>
+  <td class="km-col">16.1</td>
+  <td>KM 130/6</td>
+</tr>
 
-P 21
-07:19:43
-13.4
-फाटक -77/C
+<tr class="">
+  <td class="device-col">P 10</td>
+  <td>06:50:23</td>
+  <td class="km-col">16.4</td>
+  <td>KM 109/4</td>
+</tr>
 
-लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट
+<tr class="">
+  <td class="device-col">P 7</td>
+  <td>06:53:33</td>
+  <td class="km-col">16.6</td>
+  <td>फाटक -51/C</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 17</td>
+  <td>06:54:10</td>
+  <td class="km-col">16.4</td>
+  <td>KM 133/5</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 5</td>
+  <td>06:54:19</td>
+  <td class="km-col">16.5</td>
+  <td>KM 85/8</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 19</td>
+  <td>06:55:03</td>
+  <td class="km-col">16.2</td>
+  <td>फाटक -73/C</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 6</td>
+  <td>06:56:28</td>
+  <td class="km-col">16.3</td>
+  <td>KM 93/4</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 12</td>
+  <td>06:59:11</td>
+  <td class="km-col">16.4</td>
+  <td>KM 112/6</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 11</td>
+  <td>06:59:23</td>
+  <td class="km-col">16</td>
+  <td>फाटक -56/AC</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 4</td>
+  <td>07:03:19</td>
+  <td class="km-col">17</td>
+  <td>KM 86/3</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 18</td>
+  <td>07:03:26</td>
+  <td class="km-col">15.6</td>
+  <td>फाटक -73/C</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 3</td>
+  <td>07:09:57</td>
+  <td class="km-col">16.4</td>
+  <td>फाटक 40C</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 14</td>
+  <td>07:12:08</td>
+  <td class="km-col">16.6</td>
+  <td>KM 125/2</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 13</td>
+  <td>07:12:20</td>
+  <td class="km-col">16.5</td>
+  <td>KM 118/8</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 15</td>
+  <td>07:14:42</td>
+  <td class="km-col">16.1</td>
+  <td>KM 125/2</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 20</td>
+  <td>07:15:04</td>
+  <td class="km-col">16.4</td>
+  <td>फाटक -77/C</td>
+</tr>
+
+<tr class="">
+  <td class="device-col">P 21</td>
+  <td>07:19:32</td>
+  <td class="km-col">17.5</td>
+  <td>फाटक -77/C</td>
+</tr>
+
+</tbody>
+</table>
+
+<div class="warning">
+लाल रंग से हाइलाइट वाले पेट्रोलमैन अपने GPS रिस्टार्ट<br>
 (बंद करके दोबारा चालू) कर लें।
+</div>
+
+</body>
+</html>
