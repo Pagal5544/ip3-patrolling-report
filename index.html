@@ -86,18 +86,39 @@ tr.late td:not(.km-col) {
 
 <script>
 let sortAsc = true;
+let sortKmAsc = true;
+
 function sortDevice() {
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
-  rows.sort((a,b)=> {
-    let A = parseInt(a.cells[0].innerText.replace(/\D/g,''))||0;
-    let B = parseInt(b.cells[0].innerText.replace(/\D/g,''))||0;
-    return sortAsc ? A-B : B-A;
+
+  rows.sort((a, b) => {
+    let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
+    return sortAsc ? A - B : B - A;
   });
+
   sortAsc = !sortAsc;
-  rows.forEach(r=>table.tBodies[0].appendChild(r));
+  rows.forEach(r => table.tBodies[0].appendChild(r));
 }
-function refreshPage() { location.reload(); }
+
+function sortKm() {
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.tBodies[0].rows);
+
+  rows.sort((a, b) => {
+    let A = parseFloat(a.cells[2].innerText) || 0;
+    let B = parseFloat(b.cells[2].innerText) || 0;
+    return sortKmAsc ? A - B : B - A;
+  });
+
+  sortKmAsc = !sortKmAsc;
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}
+
+function refreshPage() {
+  location.reload();
+}
 </script>
 
 </head>
@@ -106,7 +127,7 @@ function refreshPage() { location.reload(); }
 <h2>राजघाट Night Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> 21-01-2026 09:25:49</div>
+  <div><b>Last Updated:</b> 21-01-2026 09:42:06</div>
   <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
@@ -115,7 +136,7 @@ function refreshPage() { location.reload(); }
 <tr>
   <th class="device-col" onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
-  <th class="km-col">KM Run</th>
+  <th class="km-col" onclick="sortKm()">KM Run ⬍</th>
   <th>Last Location</th>
 </tr>
 </thead>
