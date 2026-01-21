@@ -84,7 +84,7 @@ try:
     for i in range(min(3, len(data))):
         data[i][5] = True
 
-last_updated = (
+    last_updated = (
     datetime.utcnow() + timedelta(hours=5, minutes=30)
 ).strftime("%d-%m-%Y %H:%M:%S")
 
