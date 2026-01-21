@@ -57,8 +57,7 @@ try:
 
         raw_device = cols[1].text.strip()
         device_num = (
-            raw_device
-            .replace("RG-PM-CH-HGJ/", "")
+            raw_device.replace("RG-PM-CH-HGJ/", "")
             .split("#")[0]
             .replace("RG P", "")
             .strip()
@@ -82,7 +81,14 @@ try:
         except:
             continue
 
-        data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])
+        data.append([
+            device,
+            end_dt.strftime("%H:%M:%S"),
+            end_dt,
+            km_run,
+            last_location,
+            False
+        ])
 
     data.sort(key=lambda x: x[2])
 
@@ -92,47 +98,26 @@ try:
     last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
     html = f"""<!DOCTYPE html>
-<html lang="hi">
-<head>
-<meta charset="UTF-8">
-<title>Patrolling Report</title>
-</head>
-<body>
+Patrolling Report
 
-<h2>राजघाट Night Patrolling Report</h2>
-<p><b>Last Updated:</b> {last_updated}</p>
-<button onclick="location.reload()">🔄 Refresh</button>
+राजघाट Night Patrolling Report
 
-<table border="1" cellspacing="0" cellpadding="6">
-<tr>
-<th>Device</th>
-<th>End Time</th>
-<th>KM Run</th>
-<th>Last Location</th>
-</tr>
+Last Updated: {last_updated}
+🔄 Refresh
 """
 
     for d in data:
-        row_style = ' style="color:red;"' if d[5] else ""
+        row_class = "late" if d[5] else ""
         html += f"""
-<tr{row_style}>
-<td>{d[0]}</td>
-<td>{d[1]}</td>
-<td>{d[3]}</td>
-<td>{d[4]}</td>
-</tr>
+{d[0]}
+{d[1]}
+{d[3]}
+{d[4]}
 """
 
     html += """
-</table>
-
-<p>
 लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट
 (बंद करके दोबारा चालू) कर लें।
-</p>
-
-</body>
-</html>
 """
 
     with open("index.html", "w", encoding="utf-8") as f:
