@@ -176,18 +176,40 @@ tr.late td:not(.km-col) {{
 
 <script>
 let sortAsc = true;
-function sortDevice() {{
+let sortKmAsc = true;   // KM Run के लिए अलग flag
+
+function sortDevice() {
   let table = document.getElementById("reportTable");
   let rows = Array.from(table.tBodies[0].rows);
-  rows.sort((a,b)=> {{
-    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,''))||0;
-    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,''))||0;
-    return sortAsc ? A-B : B-A;
-  }});
+
+  rows.sort((a, b) => {
+    let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
+    let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
+    return sortAsc ? A - B : B - A;
+  });
+
   sortAsc = !sortAsc;
-  rows.forEach(r=>table.tBodies[0].appendChild(r));
-}}
-function refreshPage() {{ location.reload(); }}
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}
+
+/* ✅ KM RUN SORT */
+function sortKm() {
+  let table = document.getElementById("reportTable");
+  let rows = Array.from(table.tBodies[0].rows);
+
+  rows.sort((a, b) => {
+    let A = parseFloat(a.cells[2].innerText) || 0; // KM Run column
+    let B = parseFloat(b.cells[2].innerText) || 0;
+    return sortKmAsc ? A - B : B - A;
+  });
+
+  sortKmAsc = !sortKmAsc;
+  rows.forEach(r => table.tBodies[0].appendChild(r));
+}
+
+function refreshPage() {
+  location.reload();
+}
 </script>
 
 </head>
@@ -205,7 +227,7 @@ function refreshPage() {{ location.reload(); }}
 <tr>
   <th class="device-col" onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
-  <th class="km-col">KM Run</th>
+  <th class="km-col" onclick="sortKm()">KM Run ⬍</th>
   <th>Last Location</th>
 </tr>
 </thead>
