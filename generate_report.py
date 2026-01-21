@@ -83,10 +83,11 @@ try:
     for i in range(min(3, len(data))):
         data[i][5] = True
 
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta
 
-IST = timezone(timedelta(hours=5, minutes=30))
-last_updated = datetime.now(IST).strftime("%d-%m-%Y %H:%M:%S")
+last_updated = (
+    datetime.utcnow() + timedelta(hours=5, minutes=30)
+).strftime("%d-%m-%Y %H:%M:%S")
 
     html = f"""<!DOCTYPE html>
 <html lang="hi">
