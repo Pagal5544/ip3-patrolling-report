@@ -3,269 +3,174 @@
 <head>
 <meta charset="UTF-8">
 <title>Patrolling Report</title>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background:#f4f4f4;
-  margin:20px;
-}
-
-h2 { text-align:center; }
-
-.top { text-align:center; margin-bottom:12px; }
-
-table {
-  border-collapse: collapse;
-  margin:0 auto;
-  background:white;
-  position:relative;
-}
-
-table::before {
-  content:"शिवा";
-  position:absolute;
-  top:50%;
-  left:50%;
-  transform:translate(-50%,-50%) rotate(-20deg);
-  font-size:500px;
-  font-weight:900;
-  color:rgba(0,0,0,0.07);
-  z-index:0;
-}
-
-th, td {
-  border:2px solid #000;
-  padding:15px 45px;
-  text-align:center;
-  font-size:20px;
-  font-weight:900;
-  white-space:nowrap;
-  position:relative;
-  z-index:1;
-}
-
-th {
-  background:#D6E6FA;
-  cursor:pointer;
-}
-
-.device-col {
-  font-weight:900;
-  min-width:160px;
-}
-
-.km-col {
-  background:#00e600;
-}
-
-tr.late td:not(.km-col) {
-  background:red !important;
-  color:white;
-}
-
-.warning {
-  margin-top:16px;
-  background:yellow;
-  border:3px solid #000;
-  padding:15px;
-  text-align:center;
-  font-size:26px;
-  font-weight:800;
-}
-</style>
-
-<script>
-let sortAsc = true;
-function sortDevice() {
-  let table = document.getElementById("reportTable");
-  let rows = Array.from(table.tBodies[0].rows);
-
-  rows.sort((a,b)=> {
-    let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
-    let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
-    return sortAsc ? A-B : B-A;
-  });
-
-  sortAsc = !sortAsc;
-  rows.forEach(r => table.tBodies[0].appendChild(r));
-}
-</script>
-
 </head>
 <body>
 
 <h2>राजघाट Night Patrolling Report</h2>
+<p><b>Last Updated:</b> 21-01-2026 02:59:55</p>
+<button onclick="location.reload()">🔄 Refresh</button>
 
-<div class="top">
-  <b>Last Updated (IST):</b> 21-01-2026 08:23:51
-</div>
-
-<table id="reportTable">
-<thead>
+<table border="1" cellspacing="0" cellpadding="6">
 <tr>
-  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
-  <th>End Time</th>
-  <th class="km-col">KM Run</th>
-  <th>Last Location</th>
-</tr>
-</thead>
-<tbody>
-
-<tr class="late">
-  <td class="device-col">P 1488208</td>
-  <td>06:31:52</td>
-  <td class="km-col">16.6</td>
-  <td>KM 125/2</td>
+<th>Device</th>
+<th>End Time</th>
+<th>KM Run</th>
+<th>Last Location</th>
 </tr>
 
-<tr class="late">
-  <td class="device-col">P 180290</td>
-  <td>06:32:41</td>
-  <td class="km-col">16.9</td>
-  <td>फाटक 37/B</td>
+<tr style="color:red;">
+<td>P 14</td>
+<td>06:31:52</td>
+<td>16.6</td>
+<td>KM 125/2</td>
 </tr>
 
-<tr class="late">
-  <td class="device-col">P 1788279</td>
-  <td>06:33:44</td>
-  <td class="km-col">16.5</td>
-  <td>KM 133/5</td>
+<tr style="color:red;">
+<td>P 1</td>
+<td>06:32:41</td>
+<td>16.9</td>
+<td>फाटक 37/B</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 288295</td>
-  <td>06:43:35</td>
-  <td class="km-col">16.1</td>
-  <td>KM 77/1</td>
+<tr style="color:red;">
+<td>P 17</td>
+<td>06:33:44</td>
+<td>16.5</td>
+<td>KM 133/5</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1687657</td>
-  <td>06:46:35</td>
-  <td class="km-col">16.4</td>
-  <td>KM 129/6</td>
+<tr>
+<td>P 2</td>
+<td>06:43:35</td>
+<td>16.1</td>
+<td>KM 77/1</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 988293</td>
-  <td>06:49:16</td>
-  <td class="km-col">16.2</td>
-  <td>KM 101/6</td>
+<tr>
+<td>P 16</td>
+<td>06:46:35</td>
+<td>16.4</td>
+<td>KM 129/6</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 688802</td>
-  <td>06:50:01</td>
-  <td class="km-col">16.2</td>
-  <td>KM 93/5</td>
+<tr>
+<td>P 9</td>
+<td>06:49:16</td>
+<td>16.2</td>
+<td>KM 101/6</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1988175</td>
-  <td>06:50:02</td>
-  <td class="km-col">17.2</td>
-  <td>KM 141/6</td>
+<tr>
+<td>P 6</td>
+<td>06:50:01</td>
+<td>16.2</td>
+<td>KM 93/5</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 888349</td>
-  <td>06:50:15</td>
-  <td class="km-col">13.6</td>
-  <td>फाटक -51/C</td>
+<tr>
+<td>P 19</td>
+<td>06:50:02</td>
+<td>17.2</td>
+<td>KM 141/6</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 588254</td>
-  <td>06:52:41</td>
-  <td class="km-col">16.4</td>
-  <td>KM 85/8</td>
+<tr>
+<td>P 8</td>
+<td>06:50:15</td>
+<td>13.6</td>
+<td>फाटक -51/C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 788209</td>
-  <td>06:53:48</td>
-  <td class="km-col">16.5</td>
-  <td>फाटक -51/C</td>
+<tr>
+<td>P 5</td>
+<td>06:52:41</td>
+<td>16.4</td>
+<td>KM 85/8</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1888244</td>
-  <td>06:54:33</td>
-  <td class="km-col">17.4</td>
-  <td>फाटक -73/C</td>
+<tr>
+<td>P 7</td>
+<td>06:53:48</td>
+<td>16.5</td>
+<td>फाटक -51/C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1088054</td>
-  <td>06:56:10</td>
-  <td class="km-col">16.5</td>
-  <td>फाटक -56/C</td>
+<tr>
+<td>P 18</td>
+<td>06:54:33</td>
+<td>17.4</td>
+<td>फाटक -73/C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1288638</td>
-  <td>06:59:28</td>
-  <td class="km-col">16.1</td>
-  <td>KM 112/5</td>
+<tr>
+<td>P 10</td>
+<td>06:56:10</td>
+<td>16.5</td>
+<td>फाटक -56/C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1388059</td>
-  <td>06:59:37</td>
-  <td class="km-col">16.7</td>
-  <td>फाटक -61/C</td>
+<tr>
+<td>P 12</td>
+<td>06:59:28</td>
+<td>16.1</td>
+<td>KM 112/5</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 488319</td>
-  <td>07:02:19</td>
-  <td class="km-col">16.2</td>
-  <td>फाटक -42C</td>
+<tr>
+<td>P 13</td>
+<td>06:59:37</td>
+<td>16.7</td>
+<td>फाटक -61/C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1188486</td>
-  <td>07:06:13</td>
-  <td class="km-col">16.9</td>
-  <td>फाटक -56/AC</td>
+<tr>
+<td>P 4</td>
+<td>07:02:19</td>
+<td>16.2</td>
+<td>फाटक -42C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 2088243</td>
-  <td>07:11:50</td>
-  <td class="km-col">16.4</td>
-  <td>फाटक -77/C</td>
+<tr>
+<td>P 11</td>
+<td>07:06:13</td>
+<td>16.9</td>
+<td>फाटक -56/AC</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 1588347</td>
-  <td>07:13:05</td>
-  <td class="km-col">16.1</td>
-  <td>KM 125/2</td>
+<tr>
+<td>P 20</td>
+<td>07:11:50</td>
+<td>16.4</td>
+<td>फाटक -77/C</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 388317</td>
-  <td>07:14:11</td>
-  <td class="km-col">16.1</td>
-  <td>फाटक 40C</td>
+<tr>
+<td>P 15</td>
+<td>07:13:05</td>
+<td>16.1</td>
+<td>KM 125/2</td>
 </tr>
 
-<tr class="">
-  <td class="device-col">P 2188171</td>
-  <td>07:19:43</td>
-  <td class="km-col">13.4</td>
-  <td>फाटक -77/C</td>
+<tr>
+<td>P 3</td>
+<td>07:14:11</td>
+<td>16.1</td>
+<td>फाटक 40C</td>
 </tr>
 
-</tbody>
+<tr>
+<td>P 21</td>
+<td>07:19:43</td>
+<td>13.4</td>
+<td>फाटक -77/C</td>
+</tr>
+
 </table>
 
-<div class="warning">
+<p>
 लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट
 (बंद करके दोबारा चालू) कर लें।
-</div>
+</p>
 
 </body>
 </html>
