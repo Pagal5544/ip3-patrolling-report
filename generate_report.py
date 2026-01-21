@@ -15,7 +15,7 @@ LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
 if not LOGIN_USERNAME or not LOGIN_PASSWORD:
-raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
+    raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
 
 chrome_options = Options()
 chrome_options.add_argument("--headless=new")
@@ -27,193 +27,116 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
 
 try:
-# LOGIN
-driver.get("https://ip3.rilapp.com/railways/")
-wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
-wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
-wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
-time.sleep(8)
+    # LOGIN
+    driver.get("https://ip3.rilapp.com/railways/")
+    wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
+    wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
+    wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
+    time.sleep(8)
 
-# REPORT  
-REPORT_URL = (  
-    "https://ip3.rilapp.com/railways/patrollingReport.php"  
-    "?fdate=20/01/2026&ftime=23:00"  
-    "&tdate=21/01/2026&ttime=07:20"  
-    "&category=-PM&Submit=Update"  
-)  
-driver.get(REPORT_URL)  
+    # REPORT
+    REPORT_URL = (
+        "https://ip3.rilapp.com/railways/patrollingReport.php"
+        "?fdate=20/01/2026&ftime=23:00"
+        "&tdate=21/01/2026&ttime=07:20"
+        "&category=-PM&Submit=Update"
+    )
 
-rows = wait.until(  
-    EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))  
-)  
+    driver.get(REPORT_URL)
 
-data = []  
+    rows = wait.until(
+        EC.presence_of_all_elements_located((By.CSS_SELECTOR, "#example tbody tr"))
+    )
 
-for r in rows:  
-    cols = r.find_elements(By.TAG_NAME, "td")  
-    if len(cols) < 7:  
-        continue  
+    data = []
 
-    raw_device = cols[1].text.strip()  
-    device_num = raw_device.replace("RG-PM-CH-HGJ/", "").split("#")[0].replace("RG P", "").strip()  
-    device = f"P {device_num}"  
+    for r in rows:
+        cols = r.find_elements(By.TAG_NAME, "td")
+        if len(cols) < 7:
+            continue
 
-    end_time_full = cols[4].text.strip()  
-    km_run = cols[6].text.strip()  
-    last_location_raw = cols[5].text.strip()  
+        raw_device = cols[1].text.strip()
+        device_num = (
+            raw_device
+            .replace("RG-PM-CH-HGJ/", "")
+            .split("#")[0]
+            .replace("RG P", "")
+            .strip()
+        )
+        device = f"P {device_num}"
 
-    # Location cleaning  
-    loc = last_location_raw.upper()  
-    loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)  
-    loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)  
-    loc = re.sub(r"CH\s*-\s*ALJN", "", loc)  
-    loc = re.sub(r"\s+", " ", loc).strip(" -/")  
-    last_location = loc  
+        end_time_full = cols[4].text.strip()
+        km_run = cols[6].text.strip()
+        last_location_raw = cols[5].text.strip()
 
-    try:  
-        end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")  
-    except:  
-        continue  
+        # Location cleaning
+        loc = last_location_raw.upper()
+        loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)
+        loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)
+        loc = re.sub(r"CH\s*-\s*ALJN", "", loc)
+        loc = re.sub(r"\s+", " ", loc).strip(" -/")
+        last_location = loc
 
-    data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])  
+        try:
+            end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
+        except:
+            continue
 
-data.sort(key=lambda x: x[2])  
-for i in range(min(3, len(data))):  
-    data[i][5] = True  
+        data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])
 
-last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")  
+    data.sort(key=lambda x: x[2])
 
-html = f"""<!DOCTYPE html>
+    for i in range(min(3, len(data))):
+        data[i][5] = True
 
-<html lang="hi">  
-<head>  
-<meta charset="UTF-8">  
-<title>Patrolling Report</title>  <style>  
-body {{  
-  font-family: Arial, sans-serif;  
-  background:#f4f4f4;  
-  margin:20px;  
-}}  
-  
-h2 {{ text-align:center; }}  
-  
-.top {{ text-align:center; margin-bottom:12px; }}  
-  
-.refresh-btn {{  
-  padding:6px 14px;  
-  font-size:14px;  
-}}  
-  
-table {{  
-  border-collapse: collapse;  
-  table-layout: auto;  
-  width: auto;  
-  margin: 0 auto;  
-  background:white;  
-  position:relative;  
-}}  
-  
-table::before {{  
-  content:"शिवा";  
-  position:absolute;  
-  top:50%;  
-  left:50%;  
-  transform:translate(-50%,-50%) rotate(-20deg);  
-  font-size:500px;  
-  font-weight:900;  
-  color:rgba(0,0,0,0.07);  
-  z-index:0;  
-}}  
-  
-th, td {{  
-  border:2px solid #000;  
-  padding:15px 50px;          /* ⬅️ बड़ा */  
-  text-align:center;  
-  font-size:20px;          /* ⬅️ बड़ा */  
-  font-weight:900;  
-  white-space: nowrap;  
-  position:relative;  
-  z-index:1;  
-}}  
-  
-th {{  
-  background:#D6E6FA;  
-  color:black;  
-  cursor:pointer;  
-}}  
-  
-.device-col {{ font-weight:bold; }}  
-  
-.km-col {{  
-  font-weight:bold;  
-  background:#00e600;  
-  color:#000;  
-}}  
-  
-tr.late td:not(.km-col) {{  
-  background:#ff0000 !important;  
-  color:white;  
-  font-weight:bold;  
-}}  
-  
-.warning {{  
-  margin-top:16px;  
-  background:yellow;  
-  border:3px solid #000;  
-  padding:15px 5px;              /* ⬅️ छोटा */  
-  text-align:center;  
-  font-size:30px;            /* ⬅️ छोटा */  
-  font-weight:800;  
-  line-height:1.3;  
-}}  
-</style>  <script>  
-let sortAsc = true;  
-function sortDevice() {{  
-  let table = document.getElementById("reportTable");  
-  let rows = Array.from(table.tBodies[0].rows);  
-  rows.sort((a,b)=> {{  
-    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,''))||0;  
-    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,''))||0;  
-    return sortAsc ? A-B : B-A;  
-  }});  
-  sortAsc = !sortAsc;  
-  rows.forEach(r=>table.tBodies[0].appendChild(r));  
-}}  
-function refreshPage() {{ location.reload(); }}  
-</script>  </head>  
-<body>  <h2>राजघाट Night Patrolling Report</h2>  <div class="top">  
-  <div><b>Last Updated:</b> {last_updated}</div>  
-  <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>  
-</div>  <table id="reportTable">  
-<thead>  
-<tr>  
-  <th class="device-col" onclick="sortDevice()">Device ⬍</th>  
-  <th>End Time</th>  
-  <th class="km-col">KM Run</th>  
-  <th>Last Location</th>  
-</tr>  
-</thead>  
-<tbody>  
-"""  for d in data:  
-    row_class = "late" if d[5] else ""  
-    html += f"""
+    last_updated = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
 
-<tr class="{row_class}">  
-  <td class="device-col">{d[0]}</td>  
-  <td>{d[1]}</td>  
-  <td class="km-col">{d[3]}</td>  
-  <td>{d[4]}</td>  
-</tr>  
-"""  html += """
+    html = f"""<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<title>Patrolling Report</title>
+</head>
+<body>
 
-</tbody>  
-</table>  <div class="warning">  
-लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट<br>  
-(बंद करके दोबारा चालू) कर लें।  
-</div>  </body>  
-</html>  
-"""  with open("index.html", "w", encoding="utf-8") as f:  
-    f.write(html)
+<h2>राजघाट Night Patrolling Report</h2>
+<p><b>Last Updated:</b> {last_updated}</p>
+<button onclick="location.reload()">🔄 Refresh</button>
+
+<table border="1" cellspacing="0" cellpadding="6">
+<tr>
+<th>Device</th>
+<th>End Time</th>
+<th>KM Run</th>
+<th>Last Location</th>
+</tr>
+"""
+
+    for d in data:
+        row_style = ' style="color:red;"' if d[5] else ""
+        html += f"""
+<tr{row_style}>
+<td>{d[0]}</td>
+<td>{d[1]}</td>
+<td>{d[3]}</td>
+<td>{d[4]}</td>
+</tr>
+"""
+
+    html += """
+</table>
+
+<p>
+लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट
+(बंद करके दोबारा चालू) कर लें।
+</p>
+
+</body>
+</html>
+"""
+
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html)
 
 finally:
-driver.quit()
+    driver.quit()
