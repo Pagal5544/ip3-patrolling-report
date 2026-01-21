@@ -2,6 +2,7 @@ import os
 import time
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,6 +13,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 
+# ================== LOGIN CREDENTIALS ==================
 LOGIN_USERNAME = os.getenv("LOGIN_USERNAME")
 LOGIN_PASSWORD = os.getenv("LOGIN_PASSWORD")
 
@@ -19,6 +21,7 @@ if not LOGIN_USERNAME or not LOGIN_PASSWORD:
     raise RuntimeError("LOGIN_USERNAME or LOGIN_PASSWORD missing")
 
 
+# ================== CHROME SETUP ==================
 chrome_options = Options()
 chrome_options.add_argument("--headless=new")
 chrome_options.add_argument("--no-sandbox")
@@ -29,14 +32,16 @@ driver = webdriver.Chrome(service=service, options=chrome_options)
 wait = WebDriverWait(driver, 30)
 
 try:
-    # LOGIN
+    # ================== LOGIN ==================
     driver.get("https://ip3.rilapp.com/railways/")
     wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
     wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
     wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
+
+    # login success wait
     time.sleep(8)
 
-    # REPORT
+    # ================== REPORT PAGE ==================
     REPORT_URL = (
         "https://ip3.rilapp.com/railways/patrollingReport.php"
         "?fdate=20/01/2026&ftime=23:00"
@@ -57,14 +62,14 @@ try:
             continue
 
         raw_device = cols[1].text.strip()
-        device_num = raw_device.replace("RG-PM-CH-HGJ/", "").split("#")[0].replace("RG P", "").strip()
+        device_num = re.sub(r"\D+", "", raw_device)
         device = f"P {device_num}"
 
         end_time_full = cols[4].text.strip()
         km_run = cols[6].text.strip()
         last_location_raw = cols[5].text.strip()
 
-        # Location cleaning
+        # -------- Location cleaning --------
         loc = last_location_raw.upper()
         loc = re.sub(r"OHE\s*HECTO\s*METER\s*POST", "KM ", loc)
         loc = re.sub(r"CENTER\s*LINE\s*OF\s*LC", "फाटक ", loc)
@@ -74,21 +79,28 @@ try:
 
         try:
             end_dt = datetime.strptime(end_time_full, "%d/%m/%Y %H:%M:%S")
-        except:
+        except ValueError:
             continue
 
-        data.append([device, end_dt.strftime("%H:%M:%S"), end_dt, km_run, last_location, False])
+        data.append([
+            device,
+            end_dt.strftime("%H:%M:%S"),
+            end_dt,
+            km_run,
+            last_location,
+            False
+        ])
 
+    # ================== SORT & MARK LATE ==================
     data.sort(key=lambda x: x[2])
     for i in range(min(3, len(data))):
         data[i][5] = True
 
-    from datetime import datetime
-import pytz
+    # ================== IST LAST UPDATED ==================
+    ist = ZoneInfo("Asia/Kolkata")
+    last_updated = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
 
-ist = pytz.timezone("Asia/Kolkata")
-last_updated = datetime.now(ist).strftime("%d-%m-%Y %H:%M:%S")
-
+    # ================== HTML ==================
     html = f"""<!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -106,15 +118,8 @@ h2 {{ text-align:center; }}
 
 .top {{ text-align:center; margin-bottom:12px; }}
 
-.refresh-btn {{
-  padding:6px 14px;
-  font-size:14px;
-}}
-
 table {{
   border-collapse: collapse;
-  table-layout: auto;
-  width: auto;
   margin: 0 auto;
   background:white;
   position:relative;
@@ -134,77 +139,52 @@ table::before {{
 
 th, td {{
   border:2px solid #000;
-  padding:15px 50px;          /* ⬅️ बड़ा */
+  padding:15px 50px;
   text-align:center;
-  font-size:20px;          /* ⬅️ बड़ा */
+  font-size:20px;
   font-weight:900;
-  white-space: nowrap;
   position:relative;
   z-index:1;
+  white-space:nowrap;
 }}
 
 th {{
   background:#D6E6FA;
-  color:black;
-  cursor:pointer;
 }}
 
-.device-col {{ font-weight:bold; }}
-
 .km-col {{
-  font-weight:bold;
   background:#00e600;
-  color:#000;
 }}
 
 tr.late td:not(.km-col) {{
-  background:#ff0000 !important;
+  background:red;
   color:white;
-  font-weight:bold;
 }}
 
 .warning {{
   margin-top:16px;
   background:yellow;
   border:3px solid #000;
-  padding:15px 5px;              /* ⬅️ छोटा */
+  padding:15px;
   text-align:center;
-  font-size:30px;            /* ⬅️ छोटा */
+  font-size:26px;
   font-weight:800;
-  line-height:1.3;
 }}
 </style>
-
-<script>
-let sortAsc = true;
-function sortDevice() {{
-  let table = document.getElementById("reportTable");
-  let rows = Array.from(table.tBodies[0].rows);
-  rows.sort((a,b)=> {{
-    let A = parseInt(a.cells[0].innerText.replace(/\\D/g,''))||0;
-    let B = parseInt(b.cells[0].innerText.replace(/\\D/g,''))||0;
-    return sortAsc ? A-B : B-A;
-  }});
-  sortAsc = !sortAsc;
-  rows.forEach(r=>table.tBodies[0].appendChild(r));
-}}
-function refreshPage() {{ location.reload(); }}
-</script>
-
 </head>
+
 <body>
 
 <h2>राजघाट Night Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> {last_updated}</div>
-  <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
+  <b>Last Updated (IST):</b> {last_updated}
 </div>
 
-<table id="reportTable">
+<table>
 <thead>
 <tr>
-  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
+  <th>Device</th>
   <th>End Time</th>
   <th class="km-col">KM Run</th>
   <th>Last Location</th>
@@ -217,7 +197,7 @@ function refreshPage() {{ location.reload(); }}
         row_class = "late" if d[5] else ""
         html += f"""
 <tr class="{row_class}">
-  <td class="device-col">{d[0]}</td>
+  <td>{d[0]}</td>
   <td>{d[1]}</td>
   <td class="km-col">{d[3]}</td>
   <td>{d[4]}</td>
@@ -229,7 +209,7 @@ function refreshPage() {{ location.reload(); }}
 </table>
 
 <div class="warning">
-लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट<br>
+लाल रंग से हाइलाइट पेट्रोलमैन अपने GPS को रिस्टार्ट
 (बंद करके दोबारा चालू) कर लें।
 </div>
 
