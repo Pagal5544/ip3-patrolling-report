@@ -31,7 +31,7 @@ wait = WebDriverWait(driver, 30)
 
 try:
     # LOGIN
-    driver.get("https://ईp3.rilapp.com/railways/")
+    driver.get("https://ip3.rilapp.com/railways/")
     wait.until(EC.presence_of_element_located((By.NAME, "username"))).send_keys(LOGIN_USERNAME)
     wait.until(EC.presence_of_element_located((By.NAME, "password"))).send_keys(LOGIN_PASSWORD)
     wait.until(EC.element_to_be_clickable((By.XPATH, "//button[@type='submit']"))).click()
@@ -40,8 +40,8 @@ try:
     # REPORT
     REPORT_URL = (
         "https://ip3.rilapp.com/railways/patrollingReport.php"
-        "?fdate=21/01/2026&ftime=23:00"
-        "&tdate=22/01/2026&ttime=07:20"
+        "?fdate=22/01/2026&ftime=23:00"
+        "&tdate=23/01/2026&ttime=07:20"
         "&category=-PM&Submit=Update"
     )
     driver.get(REPORT_URL)
