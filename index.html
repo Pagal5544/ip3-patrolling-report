@@ -43,9 +43,9 @@ table::before {
 
 th, td {
   border:2px solid #000;
-  padding:15px 50px;          /* ⬅️ बड़ा */
+  padding:15px 50px;
   text-align:center;
-  font-size:20px;          /* ⬅️ बड़ा */
+  font-size:20px;
   font-weight:900;
   white-space: nowrap;
   position:relative;
@@ -54,14 +54,12 @@ th, td {
 
 th {
   background:#D6E6FA;
-  color:black;
   cursor:pointer;
 }
 
 .device-col { font-weight:bold; }
 
 .km-col {
-  font-weight:bold;
   background:#00e600;
   color:#000;
 }
@@ -69,227 +67,103 @@ th {
 tr.late td:not(.km-col) {
   background:#ff0000 !important;
   color:white;
-  font-weight:bold;
 }
 
 .warning {
   margin-top:16px;
   background:yellow;
   border:3px solid #000;
-  padding:15px 5px;              /* ⬅️ छोटा */
+  padding:15px;
   text-align:center;
-  font-size:30px;            /* ⬅️ छोटा */
+  font-size:28px;
   font-weight:800;
-  line-height:1.3;
 }
 </style>
 
 <script>
+const DATA_URL = "data/status.json";
+const DELAY_MIN = 10;
+
 let sortAsc = true;
 let sortKmAsc = true;
 
 function sortDevice() {
-  let table = document.getElementById("reportTable");
-  let rows = Array.from(table.tBodies[0].rows);
-
-  rows.sort((a, b) => {
-    let A = parseInt(a.cells[0].innerText.replace(/\D/g,'')) || 0;
-    let B = parseInt(b.cells[0].innerText.replace(/\D/g,'')) || 0;
-    return sortAsc ? A - B : B - A;
+  let rows = Array.from(document.querySelectorAll("#tableBody tr"));
+  rows.sort((a,b)=>{
+    let A = parseInt(a.cells[0].innerText.replace(/\D/g,''))||0;
+    let B = parseInt(b.cells[0].innerText.replace(/\D/g,''))||0;
+    return sortAsc ? A-B : B-A;
   });
-
-  sortAsc = !sortAsc;
-  rows.forEach(r => table.tBodies[0].appendChild(r));
+  sortAsc=!sortAsc;
+  rows.forEach(r=>tableBody.appendChild(r));
 }
 
 function sortKm() {
-  let table = document.getElementById("reportTable");
-  let rows = Array.from(table.tBodies[0].rows);
-
-  rows.sort((a, b) => {
-    let A = parseFloat(a.cells[2].innerText) || 0;
-    let B = parseFloat(b.cells[2].innerText) || 0;
-    return sortKmAsc ? A - B : B - A;
+  let rows = Array.from(document.querySelectorAll("#tableBody tr"));
+  rows.sort((a,b)=>{
+    let A = parseFloat(a.cells[2].innerText)||0;
+    let B = parseFloat(b.cells[2].innerText)||0;
+    return sortKmAsc ? A-B : B-A;
   });
-
-  sortKmAsc = !sortKmAsc;
-  rows.forEach(r => table.tBodies[0].appendChild(r));
+  sortKmAsc=!sortKmAsc;
+  rows.forEach(r=>tableBody.appendChild(r));
 }
 
-function refreshPage() {
-  location.reload();
+function minutesDiff(time) {
+  let [h,m]=time.split(":").map(Number);
+  let now=new Date();
+  let then=new Date();
+  then.setHours(h,m,0,0);
+  return Math.floor((now-then)/60000);
 }
+
+function refreshPage(){ location.reload(); }
+
+fetch(DATA_URL+"?t="+Date.now())
+.then(r=>r.json())
+.then(data=>{
+  document.getElementById("lastUpdate").innerText =
+    data.meta.generated_at || "";
+
+  const tbody=document.getElementById("tableBody");
+  tbody.innerHTML="";
+
+  Object.entries(data.devices).forEach(([p,v])=>{
+    const late = minutesDiff(v.end_time)>=DELAY_MIN;
+    const tr=document.createElement("tr");
+    if(late) tr.classList.add("late");
+
+    tr.innerHTML=`
+      <td class="device-col">${p}</td>
+      <td>${v.end_time}</td>
+      <td class="km-col">${v.km}</td>
+      <td></td>
+    `;
+    tbody.appendChild(tr);
+  });
+});
 </script>
-
 </head>
+
 <body>
 
 <h2>राजघाट Night Patrolling Report</h2>
 
 <div class="top">
-  <div><b>Last Updated:</b> 25-01-2026 07:16:08</div>
+  <div><b>Last Updated:</b> <span id="lastUpdate"></span></div>
   <button class="refresh-btn" onclick="refreshPage()">🔄 Refresh</button>
 </div>
 
 <table id="reportTable">
 <thead>
 <tr>
-  <th class="device-col" onclick="sortDevice()">Device ⬍</th>
+  <th onclick="sortDevice()">Device ⬍</th>
   <th>End Time</th>
   <th class="km-col" onclick="sortKm()">KM Run ⬍</th>
   <th>Last Location</th>
 </tr>
 </thead>
-<tbody>
-
-<tr class="late">
-  <td class="device-col">P 14</td>
-  <td>06:22:39</td>
-  <td class="km-col">16.1</td>
-  <td>KM 125/2</td>
-</tr>
-
-<tr class="late">
-  <td class="device-col">P 8</td>
-  <td>06:27:08</td>
-  <td class="km-col">16.9</td>
-  <td>फाटक -51/C</td>
-</tr>
-
-<tr class="late">
-  <td class="device-col">P 17</td>
-  <td>06:34:49</td>
-  <td class="km-col">16.6</td>
-  <td>CENTERLINEOFUNMANNEDLC-69/C</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 9</td>
-  <td>06:37:10</td>
-  <td class="km-col">16.2</td>
-  <td>KM 101/6</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 7</td>
-  <td>06:37:48</td>
-  <td class="km-col">16.4</td>
-  <td>फाटक -51/C</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 6</td>
-  <td>06:38:54</td>
-  <td class="km-col">16.1</td>
-  <td>KM 93/5</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 3</td>
-  <td>06:46:05</td>
-  <td class="km-col">16.1</td>
-  <td>79/0</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 1</td>
-  <td>06:46:57</td>
-  <td class="km-col">16</td>
-  <td>KM 69/9</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 18</td>
-  <td>06:51:08</td>
-  <td class="km-col">16.1</td>
-  <td>फाटक -73/C</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 2</td>
-  <td>06:51:29</td>
-  <td class="km-col">16.5</td>
-  <td>KM 77/1</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 19</td>
-  <td>06:51:39</td>
-  <td class="km-col">16.4</td>
-  <td>फाटक -73/C</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 4</td>
-  <td>06:51:43</td>
-  <td class="km-col">17.2</td>
-  <td>KM 86/3</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 12</td>
-  <td>06:56:32</td>
-  <td class="km-col">16.1</td>
-  <td>KM 112/5</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 5</td>
-  <td>07:02:23</td>
-  <td class="km-col">16.9</td>
-  <td>KM 85/7</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 16</td>
-  <td>07:02:35</td>
-  <td class="km-col">17.2</td>
-  <td>KM 129/4</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 15</td>
-  <td>07:03:02</td>
-  <td class="km-col">16.2</td>
-  <td>KM 125/2</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 11</td>
-  <td>07:04:58</td>
-  <td class="km-col">16.4</td>
-  <td>KM 110/1</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 13</td>
-  <td>07:11:58</td>
-  <td class="km-col">16.6</td>
-  <td>KM 118/8</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 10</td>
-  <td>07:13:38</td>
-  <td class="km-col">16.2</td>
-  <td>फाटक -56/C</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 21</td>
-  <td>07:15:28</td>
-  <td class="km-col">17.1</td>
-  <td>फाटक -77/C</td>
-</tr>
-
-<tr class="">
-  <td class="device-col">P 20</td>
-  <td>07:15:29</td>
-  <td class="km-col">16.2</td>
-  <td>फाटक -77/C</td>
-</tr>
-
-</tbody>
+<tbody id="tableBody"></tbody>
 </table>
 
 <div class="warning">
