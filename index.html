@@ -12,6 +12,7 @@ th,td{border:2px solid #000;padding:12px 30px;text-align:center;font-weight:700}
 th{background:#d6e6fa}
 .km{background:#00e600}
 .late td:not(.km){background:red;color:#fff}
+.top{text-align:center;margin-bottom:10px}
 </style>
 
 <script>
@@ -24,33 +25,43 @@ function cleanAddress(a){
     .trim();
 }
 
-fetch("data/status.json?v=" + Date.now())
-.then(r=>r.json())
-.then(data=>{
-  document.getElementById("last").innerText = data.meta.generated_at;
-  const tb=document.getElementById("body");
-  tb.innerHTML="";
-  Object.entries(data.devices).forEach(([p,v])=>{
-    const tr=document.createElement("tr");
-    if(v.end_time < "07:00") tr.className="late";
-    tr.innerHTML=`
-      <td>${p}</td>
-      <td>${v.end_time}</td>
-      <td class="km">${v.km}</td>
-      <td>${cleanAddress(v.end_address)}</td>
-    `;
-    tb.appendChild(tr);
+function loadData(){
+  fetch("data/status.json?v=" + Date.now())
+  .then(r=>r.json())
+  .then(data=>{
+    document.getElementById("reportTime").innerText =
+      data.meta.generated_at || "";
+
+    document.getElementById("siteTime").innerText =
+      new Date().toLocaleString("hi-IN");
+
+    const tb=document.getElementById("body");
+    tb.innerHTML="";
+    Object.entries(data.devices).forEach(([p,v])=>{
+      const tr=document.createElement("tr");
+      if(v.end_time < "07:00") tr.className="late";
+      tr.innerHTML=`
+        <td>${p}</td>
+        <td>${v.end_time}</td>
+        <td class="km">${v.km}</td>
+        <td>${cleanAddress(v.end_address)}</td>
+      `;
+      tb.appendChild(tr);
+    });
   });
-});
+}
 </script>
 </head>
 
-<body>
+<body onload="loadData()">
+
 <h2>राजघाट Night Patrolling Report</h2>
-<p style="text-align:center">
+
+<div class="top">
   <b>Website Updated:</b> <span id="siteTime"></span><br>
-  <b>Report Generated:</b> <span id="reportTime"></span>
-</p>
+  <b>Report Generated:</b> <span id="reportTime"></span><br><br>
+  <button onclick="loadData()">🔄 Refresh</button>
+</div>
 
 <table>
 <thead>
@@ -63,5 +74,6 @@ fetch("data/status.json?v=" + Date.now())
 </thead>
 <tbody id="body"></tbody>
 </table>
+
 </body>
 </html>
