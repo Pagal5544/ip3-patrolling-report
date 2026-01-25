@@ -1,18 +1,7 @@
 {
-  "meta": {
-    "category": "-PM",
-    "generated_at": "25/1/2026, 12:29:16 pm"
-  },
-  "devices": {
-    "P1": {
-      "km": 16,
-      "end_time": "06:42",
-      "end_address": "KM 69/9"
-    },
-    "P2": {
-      "km": 15,
-      "end_time": "07:21",
-      "end_address": "LC 40/C"
-    }
-  }
+  "category": "-PM",
+  "from": "24/01/2026 11:00 pm",
+  "to": "25/01/2026 07:20 am",
+  "generated_at": "25/1/2026, 12:36:26 pm",
+  "devices": []
 }
