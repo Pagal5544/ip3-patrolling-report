@@ -8,87 +8,108 @@
   "devices": {
     "P1": {
       "km": 16,
-      "end_time": "06:42"
+      "end_time": "06:42",
+      "end_address": "CENTERLINEOFLC37/BCH-ALJN"
     },
     "P2": {
       "km": 15,
-      "end_time": "07:21"
+      "end_time": "07:21",
+      "end_address": "CENTERLINEOFLC40CCH-ALJN"
     },
     "P3": {
       "km": 16.4,
-      "end_time": "06:38"
+      "end_time": "06:38",
+      "end_address": "CENTERLINEOFLC40CCH-ALJN"
     },
     "P4": {
       "km": 15.7,
-      "end_time": "07:00"
+      "end_time": "07:00",
+      "end_address": "OHEHECTOMETERPOST86/0CH-ALJN"
     },
     "P5": {
       "km": 17.2,
-      "end_time": "06:23"
+      "end_time": "06:23",
+      "end_address": "OHEHECTOMETERPOST86/0CH-ALJN"
     },
     "P6": {
       "km": 16.5,
-      "end_time": "07:43"
+      "end_time": "07:43",
+      "end_address": "OHEHECTOMETERPOST93/5CH-ALJN"
     },
     "P7": {
       "km": 16.6,
-      "end_time": "06:56"
+      "end_time": "06:56",
+      "end_address": "CENTERLINEOFLC-51/CCH-ALJN"
     },
     "P8": {
       "km": 16.2,
-      "end_time": "07:08"
+      "end_time": "07:08",
+      "end_address": "OHEHECTOMETERPOST98/1CH-ALJN"
     },
     "P9": {
       "km": 16.1,
-      "end_time": "06:53"
+      "end_time": "06:53",
+      "end_address": "OHEHECTOMETERPOST101/7CH-ALJN"
     },
     "P10": {
       "km": 16.8,
-      "end_time": "06:39"
+      "end_time": "06:39",
+      "end_address": "OHEHECTOMETERPOST110/1CH-ALJN"
     },
     "P11": {
       "km": 18.7,
-      "end_time": "15:56"
+      "end_time": "15:56",
+      "end_address": "OHEHECTOMETERPOST112/6CH-ALJN"
     },
     "P12": {
       "km": 15.8,
-      "end_time": "06:55"
+      "end_time": "06:55",
+      "end_address": "OHEHECTOMETERPOST112/5CH-ALJN"
     },
     "P13": {
       "km": 16.2,
-      "end_time": "07:07"
+      "end_time": "07:07",
+      "end_address": "OHEHECTOMETERPOST118/8CH-ALJN"
     },
     "P14": {
       "km": 16.2,
-      "end_time": "06:45"
+      "end_time": "06:45",
+      "end_address": "OHEHECTOMETERPOST125/2CH-ALJN"
     },
     "P15": {
       "km": 15.9,
-      "end_time": "06:46"
+      "end_time": "06:46",
+      "end_address": "OHEHECTOMETERPOST125/2CH-ALJN"
     },
     "P16": {
       "km": 16.4,
-      "end_time": "07:06"
+      "end_time": "07:06",
+      "end_address": "OHEHECTOMETERPOST129/4CH-ALJN"
     },
     "P17": {
       "km": 17.3,
-      "end_time": "06:37"
+      "end_time": "06:37",
+      "end_address": "OHEHECTOMETERPOST133/3CH-ALJN"
     },
     "P18": {
       "km": 16.9,
-      "end_time": "06:50"
+      "end_time": "06:50",
+      "end_address": "CENTERLINEOFLC-73/CCH-ALJN"
     },
     "P19": {
       "km": 16.1,
-      "end_time": "06:59"
+      "end_time": "06:59",
+      "end_address": "CENTERLINEOFLC-73/CCH-ALJN"
     },
     "P20": {
       "km": 16.9,
-      "end_time": "15:30"
+      "end_time": "15:30",
+      "end_address": "CENTERLINEOFLC-77/CCH-ALJN"
     },
     "P21": {
       "km": 16.1,
-      "end_time": "06:39"
+      "end_time": "06:39",
+      "end_address": "CENTERLINEOFLC-77/CCH-ALJN"
     }
   }
 }
