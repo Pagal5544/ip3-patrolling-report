@@ -3,7 +3,7 @@
     "category": "-PM",
     "from": "24/12/2025 11:00 pm",
     "to": "25/12/2025 16:00",
-    "generated_at": "25/01/2026, 10:53:27"
+    "generated_at": "25/01/2026, 11:44:29"
   },
   "devices": {
     "P1": {
@@ -107,9 +107,9 @@
       "end_address": "CENTERLINEOFLC-77/CCH-ALJN"
     },
     "P21": {
-      "km": 16.5,
-      "end_time": "08:39",
-      "end_address": "CENTERLINEOFLC-70/CCH-ALJN"
+      "km": 16.1,
+      "end_time": "06:39",
+      "end_address": "CENTERLINEOFLC-77/CCH-ALJN"
     }
   }
 }
