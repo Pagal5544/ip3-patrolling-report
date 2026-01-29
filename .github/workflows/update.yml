@@ -4,7 +4,7 @@ name: Update Patrolling Report
 permissions:
   contents: write
 
-# ⏱️ Manual + Auto (हर 2 दिन)
+# ⏱️ Manual + Auto (हर 5 मिनट)
 on:
   workflow_dispatch:
   schedule:
