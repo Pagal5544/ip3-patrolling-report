@@ -8,7 +8,7 @@ permissions:
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    -(ise कट करके cron लगाओ): "*/5 * * * *"
 
 jobs:
   build:
